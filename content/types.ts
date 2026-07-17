@@ -135,7 +135,11 @@ export type Notice = {
   type: NoticeType;
   date: string; // ISO
   title: Bilingual;
+  /** One-line summary shown on the notice board and index. */
   summary: Bilingual;
+  /** The full notice text for the /news/[slug] page. Optional — a notice
+   *  with none renders as its summary alone. Do NOT invent notice bodies. */
+  body?: Bilingual[];
 };
 
 export type Stat = {
