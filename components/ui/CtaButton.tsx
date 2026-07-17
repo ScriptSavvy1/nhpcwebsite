@@ -5,8 +5,10 @@ import type { ReactNode } from 'react';
 // red treatment and it is outline-only, never filled.
 type Variant = 'primary' | 'outline' | 'danger';
 
+// min-h (not fixed h) so a stacked bilingual label can grow taller than 44px
+// while single-line buttons still land exactly on the 44px tap target.
 const base =
-  'inline-flex h-11 items-center justify-center gap-2 rounded-md px-5 text-sm font-semibold transition-colors duration-150 focus-visible:outline-2';
+  'inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-md px-5 py-1.5 text-sm font-semibold transition-colors duration-150 focus-visible:outline-2';
 
 const variants: Record<Variant, string> = {
   primary: 'bg-nhpc-blue text-white hover:bg-nhpc-dark',

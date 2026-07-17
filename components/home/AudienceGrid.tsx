@@ -20,7 +20,7 @@ export default function AudienceGrid({ lang }: { lang: Lang }) {
         return (
           <section
             key={a.id}
-            className="flex flex-col rounded-lg border border-t-[3px] border-nhpc-rule border-t-nhpc-blue bg-white p-5"
+            className="flex flex-col rounded-lg border border-l-4 border-nhpc-rule border-l-nhpc-blue bg-white p-6 md:p-8"
           >
             <Icon className="h-8 w-8 flex-none text-nhpc-blue" aria-hidden="true" />
             <h3 className="mt-3 text-lg font-bold tracking-tight text-nhpc-dark">

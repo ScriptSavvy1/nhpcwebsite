@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BellOff } from 'lucide-react';
 import type { Lang, Notice, NoticeType } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
 import EmptyState from './EmptyState';
@@ -32,6 +33,7 @@ export default function NoticeBoard({
     return (
       <EmptyState
         lang={lang}
+        icon={BellOff}
         heading={{
           en: 'No notices have been published yet.',
           so: 'Ma jiraan ogeysiisyo weli.',
