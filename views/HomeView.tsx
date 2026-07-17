@@ -14,7 +14,7 @@ import {
 import { latestNotices } from '@/content/news';
 import CtaButton from '@/components/ui/CtaButton';
 import StackedLabel from '@/components/ui/StackedLabel';
-import SectionBand from '@/components/ui/SectionBand';
+import SectionHead from '@/components/ui/SectionHead';
 import StatCard from '@/components/ui/StatCard';
 import NoticeBoard from '@/components/ui/NoticeBoard';
 import AudienceGrid from '@/components/home/AudienceGrid';
@@ -118,45 +118,53 @@ export default function HomeView({ lang }: { lang: Lang }) {
       {/* ── Audience doors — white ── */}
       <section className="bg-white" aria-labelledby="doors-heading">
         <div className="mx-auto max-w-6xl px-4 py-12">
-          <h2 id="doors-heading" className="mb-5 text-xl font-bold tracking-tight text-nhpc-dark">
-            {so ? 'Dooro dariiqaaga' : 'Choose your path'}
-          </h2>
-          <AudienceGrid lang={lang} />
+          <SectionHead
+            id="doors-heading"
+            lang={lang}
+            title={{ en: 'Choose your path', so: 'Dooro dariiqaaga' }}
+          />
+          <div className="mt-8">
+            <AudienceGrid lang={lang} />
+          </div>
         </div>
       </section>
 
       {/* ── Statistics — nhpc-wash ── */}
       <section className="bg-nhpc-wash" aria-labelledby="stats-heading">
         <div className="mx-auto max-w-6xl px-4 py-12">
-          <h2 id="stats-heading" className="mb-5 text-xl font-bold tracking-tight text-nhpc-dark">
-            {so ? 'NHPC tirooyin ahaan' : 'NHPC at a glance'}
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <SectionHead
+            id="stats-heading"
+            lang={lang}
+            title={{ en: 'NHPC at a glance', so: 'NHPC tirooyin ahaan' }}
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {stats.map((s, i) => (
               <StatCard key={i} stat={s} lang={lang} />
             ))}
           </div>
-          <p className="mt-3 text-xs text-nhpc-grey">{t(statsCaption, lang)}</p>
+          <p className="mt-3 text-center text-xs text-nhpc-grey">{t(statsCaption, lang)}</p>
         </div>
       </section>
 
       {/* ── News & notices — white ── */}
       <section className="bg-white" aria-labelledby="notices-heading">
         <div className="mx-auto max-w-6xl px-4 py-12">
-          <SectionBand id="notices-heading">
-            {so ? 'Wararka & Ogeysiisyada' : 'News & Notices'}
-          </SectionBand>
-          <div className="mt-5">
+          <SectionHead
+            id="notices-heading"
+            lang={lang}
+            title={{ en: 'News & Notices', so: 'Wararka & Ogeysiisyada' }}
+          />
+          <div className="mx-auto mt-8 max-w-3xl">
             <NoticeBoard notices={notices} lang={lang} />
-          </div>
-          <div className="mt-4">
-            <Link
-              href={localizedHref('/news', lang)}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:text-nhpc-dark"
-            >
-              {so ? 'Eeg dhammaan wararka' : 'View all news'}
-              <ArrowRight className="h-4 w-4 flex-none" aria-hidden="true" />
-            </Link>
+            <div className="mt-4 text-center">
+              <Link
+                href={localizedHref('/news', lang)}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:text-nhpc-dark"
+              >
+                {so ? 'Eeg dhammaan wararka' : 'View all news'}
+                <ArrowRight className="h-4 w-4 flex-none" aria-hidden="true" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
