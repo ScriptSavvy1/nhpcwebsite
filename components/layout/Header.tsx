@@ -9,7 +9,6 @@ import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
 import { orgName, primaryNav, headerActions } from '@/content/site';
 import LanguageToggle from './LanguageToggle';
-import StackedLabel from '@/components/ui/StackedLabel';
 
 // Strip the /[lang] prefix → first path segment ('' for the home page).
 function firstSegment(pathname: string): string {
@@ -87,27 +86,23 @@ export default function Header({ lang }: { lang: Lang }) {
             <LanguageToggle lang={lang} />
           </div>
 
-          {/* Verify — outline blue. Icon-only below sm; stacked label ≥sm. */}
+          {/* Verify — outline blue. Icon-only below sm. */}
           <Link
             href={localizedHref(headerActions.verify.href, lang)}
-            className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-md border border-nhpc-blue px-3 py-1 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:bg-nhpc-wash"
+            className="inline-flex h-11 items-center justify-center gap-1.5 rounded-md border border-nhpc-blue px-3 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:bg-nhpc-wash"
           >
             <ShieldCheck className="h-4 w-4 flex-none" aria-hidden="true" />
-            <StackedLabel label={headerActions.verify.label} lang={lang} className="hidden sm:flex" />
+            <span className="hidden sm:inline">{t(headerActions.verify.label, lang)}</span>
             <span className="sr-only sm:hidden">{t(headerActions.verify.label, lang)}</span>
           </Link>
 
           {/* Report Malpractice — outline RED only, never filled. */}
           <Link
             href={localizedHref(headerActions.reportMalpractice.href, lang)}
-            className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-md border-2 border-nhpc-red px-3 py-1 text-sm font-semibold text-nhpc-dark transition-colors duration-150 hover:bg-nhpc-wash"
+            className="inline-flex h-11 items-center justify-center gap-1.5 rounded-md border-2 border-nhpc-red px-3 text-sm font-semibold text-nhpc-dark transition-colors duration-150 hover:bg-nhpc-wash"
           >
             <AlertTriangle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
-            <StackedLabel
-              label={headerActions.reportMalpractice.label}
-              lang={lang}
-              className="hidden sm:flex"
-            />
+            <span className="hidden sm:inline">{t(headerActions.reportMalpractice.label, lang)}</span>
             <span className="sr-only sm:hidden">
               {t(headerActions.reportMalpractice.label, lang)}
             </span>

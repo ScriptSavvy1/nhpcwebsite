@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
 import type { Bilingual, Lang } from '@/content/types';
 import { t } from '@/lib/i18n';
 
@@ -20,21 +19,15 @@ export default function EmptyState({
   heading,
   body,
   lang,
-  icon: Icon,
 }: {
   /** What is not here yet, e.g. "No decisions have been published yet." */
   heading: Bilingual;
   /** When it will appear, and where else to look. */
   body: Bilingual;
   lang: Lang;
-  /** Optional muted lucide icon centred above the heading. Off by default —
-   *  most empty states are inline table/section panels that read cleaner
-   *  without one; the notice board opts in. */
-  icon?: LucideIcon;
 }) {
   return (
     <div className="border-l-[3px] border-nhpc-blue bg-nhpc-wash px-4 py-6 text-center">
-      {Icon && <Icon className="mx-auto mb-2 h-8 w-8 text-nhpc-tint" aria-hidden="true" />}
       <p className="text-sm font-semibold text-nhpc-dark">{t(heading, lang)}</p>
       <p className="mt-1 text-sm text-nhpc-grey">{t(body, lang)}</p>
     </div>
