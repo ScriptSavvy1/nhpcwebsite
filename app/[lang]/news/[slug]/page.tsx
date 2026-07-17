@@ -7,11 +7,18 @@ import type { Lang, NoticeType } from '@/content/types';
 import { notices, noticeBySlug } from '@/content/news';
 
 // Detail page for one notice. generateStaticParams is driven entirely by
-// content/news.ts: zero notices → zero params → zero pages, and with
-// dynamicParams=false no notice URL resolves. Add a notice and its page
-// appears. Nothing here invents content — the body is whatever the notice
-// carries, and a notice with no body renders as its summary.
+// content/news.ts: add a notice and its page appears. Nothing here invents
+// content — the body is whatever the notice carries, and a notice with no
+// body renders as its summary.
+//
+// The sentinel: `output: export` refuses to build a dynamic route with zero
+// static params, and at launch there are no notices. Rather than invent a
+// sample notice to satisfy the build, we emit ONE throwaway slug that
+// resolves to notFound() — so the build is green, no real notice page exists,
+// and the moment a real notice is added it replaces the sentinel entirely.
+const SENTINEL = '__no-notices__';
 export function generateStaticParams() {
+  if (notices.length === 0) return [{ slug: SENTINEL }];
   return notices.map((n) => ({ slug: n.slug }));
 }
 export const dynamicParams = false;
