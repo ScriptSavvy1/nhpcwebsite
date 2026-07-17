@@ -7,6 +7,7 @@ import { PORTAL_URL } from '@/content/site';
 import { sittings } from '@/content/examinations';
 import PageHeader from '@/components/ui/PageHeader';
 import ActFooter from '@/components/ui/ActFooter';
+import EmptyState from '@/components/ui/EmptyState';
 import SectionBand from '@/components/ui/SectionBand';
 import NumberedRows from '@/components/ui/NumberedRows';
 import CtaButton from '@/components/ui/CtaButton';
@@ -113,17 +114,18 @@ export default function ExaminationsPage({ params }: { params: { lang: string } 
           </SectionBand>
 
           {sittings.length === 0 ? (
-            <div className="mt-5 border-l-[3px] border-nhpc-blue bg-nhpc-wash px-4 py-6 text-center">
-              <p className="text-sm font-semibold text-nhpc-dark">
-                {so
-                  ? 'Ma jiraan imtixaanno la qorsheeyay weli.'
-                  : 'No examinations are scheduled yet.'}
-              </p>
-              <p className="mt-1 text-sm text-nhpc-grey">
-                {so
-                  ? 'Marka Goluhu imtixaan qorsheeyo, halkan ayaa lagu daabici doonaa, waxaana lagu dhawaaqi doonaa Wararka & Ogeysiisyada.'
-                  : 'When the Council schedules a sitting, it will be published here and announced in News & Notices.'}
-              </p>
+            <div className="mt-5">
+              <EmptyState
+                lang={lang}
+                heading={{
+                  en: 'No examinations are scheduled yet.',
+                  so: 'Ma jiraan imtixaanno la qorsheeyay weli.',
+                }}
+                body={{
+                  en: 'When the Council schedules a sitting, it will be published here and announced in News & Notices.',
+                  so: 'Marka Goluhu imtixaan qorsheeyo, halkan ayaa lagu daabici doonaa, waxaana lagu dhawaaqi doonaa Wararka & Ogeysiisyada.',
+                }}
+              />
             </div>
           ) : (
             <>

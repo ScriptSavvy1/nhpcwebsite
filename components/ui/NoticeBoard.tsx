@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Lang, Notice, NoticeType } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
+import EmptyState from './EmptyState';
 
 const typeLabel: Record<NoticeType, { en: string; so: string }> = {
   notice: { en: 'Notice', so: 'Ogeysiis' },
@@ -29,16 +30,17 @@ export default function NoticeBoard({
 }) {
   if (notices.length === 0) {
     return (
-      <div className="border-l-[3px] border-nhpc-blue bg-nhpc-wash px-4 py-6 text-center">
-        <p className="text-sm font-semibold text-nhpc-dark">
-          {lang === 'so' ? 'Ma jiraan ogeysiisyo weli.' : 'No notices have been published yet.'}
-        </p>
-        <p className="mt-1 text-sm text-nhpc-grey">
-          {lang === 'so'
-            ? 'Wararka rasmiga ah iyo xilliyada imtixaanadu halkan ayay ka soo bixi doonaan.'
-            : 'Official notices and examination deadlines will appear here.'}
-        </p>
-      </div>
+      <EmptyState
+        lang={lang}
+        heading={{
+          en: 'No notices have been published yet.',
+          so: 'Ma jiraan ogeysiisyo weli.',
+        }}
+        body={{
+          en: 'Official notices and examination deadlines will appear here.',
+          so: 'Wararka rasmiga ah iyo xilliyada imtixaanadu halkan ayay ka soo bixi doonaan.',
+        }}
+      />
     );
   }
 

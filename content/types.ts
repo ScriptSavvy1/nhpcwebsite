@@ -87,6 +87,20 @@ export type ExamSitting = {
   status: 'open' | 'closed';
 };
 
+/** A CPD provider accredited by the Council.
+ *
+ *  Do NOT invent providers. Listing an unaccredited provider would send a
+ *  professional to buy CPD that will not count towards their renewal. */
+export type CpdProvider = {
+  name: Bilingual;
+  /** What the provider is accredited to deliver. */
+  scope: Bilingual;
+  /** Accreditation reference issued by the Council. */
+  ref: string;
+  /** ISO date the accreditation expires. */
+  validUntil: string;
+};
+
 export type NoticeType = 'notice' | 'exam' | 'cpd' | 'disciplinary' | 'press';
 
 export type Notice = {

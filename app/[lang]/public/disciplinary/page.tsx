@@ -6,6 +6,7 @@ import type { Lang } from '@/content/types';
 import { outcomes } from '@/content/disciplinary';
 import PageHeader from '@/components/ui/PageHeader';
 import ActFooter from '@/components/ui/ActFooter';
+import EmptyState from '@/components/ui/EmptyState';
 import SectionBand from '@/components/ui/SectionBand';
 
 // Bespoke page. Deliberately unlike /public/verify: nothing to apply for,
@@ -77,15 +78,18 @@ export default function DisciplinaryPage({ params }: { params: { lang: string } 
 
           {outcomes.length === 0 ? (
             // Launch-empty, said plainly. No invented cases.
-            <div className="mt-5 border-l-[3px] border-nhpc-blue bg-nhpc-wash px-4 py-6 text-center">
-              <p className="text-sm font-semibold text-nhpc-dark">
-                {so ? 'Ma jiraan go’aamo la daabacay weli.' : 'No decisions have been published yet.'}
-              </p>
-              <p className="mt-1 text-sm text-nhpc-grey">
-                {so
-                  ? 'Marka Goluhu go’aan gaadho, halkan ayaa lagu daabici doonaa.'
-                  : 'When the Council reaches a decision, it will be published here.'}
-              </p>
+            <div className="mt-5">
+              <EmptyState
+                lang={lang}
+                heading={{
+                  en: 'No decisions have been published yet.',
+                  so: 'Ma jiraan go’aamo la daabacay weli.',
+                }}
+                body={{
+                  en: 'When the Council reaches a decision, it will be published here.',
+                  so: 'Marka Goluhu go’aan gaadho, halkan ayaa lagu daabici doonaa.',
+                }}
+              />
             </div>
           ) : (
             <>
