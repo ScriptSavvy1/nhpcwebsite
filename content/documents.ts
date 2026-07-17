@@ -27,7 +27,12 @@ export const documents: DocumentEntry[] = [
     },
     href: '/documents/nhpc-act-lr31-2020.pdf',
     fileSize: '339 KB',
-    language: 'SO/EN',
+    // VERIFIED against the file itself: the Act PDF is English only. The
+    // filename and our earlier label both said SO/EN; the body text is not.
+    // Do not "correct" this back without re-checking the PDF — telling a
+    // Somali speaker the authoritative law is available in Somali, when it
+    // is not, is the exact failure the language badge exists to prevent.
+    language: 'EN',
     lastUpdated: '2026-07-16',
     docRef: 'NHPC / ACT / Lr.31',
     category: 'act',

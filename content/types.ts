@@ -87,6 +87,33 @@ export type ExamSitting = {
   status: 'open' | 'closed';
 };
 
+/** One constituency's seat allocation on the Council.
+ *
+ *  This is STRUCTURE, not a placeholder: Article 3 fixes the composition, so
+ *  it is publishable today. Do not edit the numbers to match who happens to
+ *  be sitting — the allocation is what the law says, and a vacant seat is
+ *  still a seat. */
+export type CouncilSeat = {
+  /** The body represented or nominating. */
+  constituency: Bilingual;
+  seats: number;
+};
+
+/** A named, appointed member of the Council.
+ *
+ *  Separate from CouncilSeat by design. The composition is law and ships now;
+ *  the names are appointments and ship when the Council publishes them. Do
+ *  NOT invent members, and do not guess who holds a seat. */
+export type CouncilMember = {
+  name: Bilingual;
+  /** The seat held — should correspond to a CouncilSeat constituency. */
+  constituency: Bilingual;
+  /** e.g. Chairperson. Omit for ordinary members. */
+  role?: Bilingual;
+  /** ISO date the three-year term began (Art. 3(8)). */
+  termStart: string;
+};
+
 /** A CPD provider accredited by the Council.
  *
  *  Do NOT invent providers. Listing an unaccredited provider would send a
