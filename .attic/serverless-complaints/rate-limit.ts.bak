@@ -1,0 +1,114 @@
+import { createHash } from 'crypto';
+
+// ─────────────────────────────────────────────────────────────────────
+// 5 complaints per hour per IP.
+//
+// Raw IPs are NEVER stored or logged — only a salted SHA-256 hash, which
+// is used as a counter key and nothing else. A public complaint form
+// attracts spam and, occasionally, targeted abuse; this is the only thing
+// standing between the inbox and either.
+//
+// Storage: Upstash Redis REST. This is REQUIRED in production and the
+// process refuses to start without it — see the hard failure below.
+// The in-process Map is a DEVELOPMENT-ONLY fallback: serverless runs many
+// instances, so per-instance memory does not hold across them or across
+// cold starts, which in production means no rate limit at all.
+// ─────────────────────────────────────────────────────────────────────
+
+const LIMIT = 5;
+const WINDOW_SECONDS = 60 * 60;
+
+const hasUpstash = Boolean(
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
+);
+
+// ── Fail hard, do not degrade ────────────────────────────────────────
+// A public complaints form on a health regulator with no working rate
+// limit is an incident, not a warning. Crash the function on cold start
+// instead: an app that will not boot is a fixable problem that someone
+// notices immediately.
+//
+// The NEXT_PHASE guard lets `next build` import this module in CI, where
+// runtime secrets are legitimately absent. The check still fires on every
+// real cold start in production.
+if (
+  process.env.NODE_ENV === 'production' &&
+  process.env.NEXT_PHASE !== 'phase-production-build' &&
+  !hasUpstash
+) {
+  throw new Error(
+    'FATAL: UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production. ' +
+      'Without a shared store the 5/hour complaint rate limit does not hold across serverless ' +
+      'instances, leaving the public complaints form with no rate limit at all. Refusing to start.',
+  );
+}
+
+export function hashIp(ip: string): string {
+  const salt = process.env.IP_HASH_SALT ?? 'nhpc-dev-salt';
+  return createHash('sha256').update(`${salt}:${ip}`).digest('hex').slice(0, 32);
+}
+
+/** Best-effort client IP from proxy headers. Never persisted in raw form. */
+export function clientIpFrom(headers: Headers): string {
+  const fwd = headers.get('x-forwarded-for');
+  if (fwd) return fwd.split(',')[0]!.trim();
+  return headers.get('x-real-ip') ?? '0.0.0.0';
+}
+
+type Result = { ok: boolean; remaining: number; distributed: boolean };
+
+// ── In-memory fallback — DEVELOPMENT ONLY (see the hard failure above) ─
+const memory = new Map<string, { count: number; resetAt: number }>();
+
+function memoryLimit(key: string): Result {
+  const now = Date.now();
+  const entry = memory.get(key);
+  if (!entry || entry.resetAt <= now) {
+    memory.set(key, { count: 1, resetAt: now + WINDOW_SECONDS * 1000 });
+    return { ok: true, remaining: LIMIT - 1, distributed: false };
+  }
+  entry.count += 1;
+  // Opportunistic cleanup — this map must not grow unbounded.
+  if (memory.size > 5000) {
+    for (const [k, v] of memory) if (v.resetAt <= now) memory.delete(k);
+  }
+  return { ok: entry.count <= LIMIT, remaining: Math.max(0, LIMIT - entry.count), distributed: false };
+}
+
+// ── Upstash Redis via REST (no extra dependency) ─────────────────────
+async function upstashLimit(key: string): Promise<Result | null> {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Unreachable in production — the module throws on cold start without it.
+  if (!url || !token) return null;
+
+  try {
+    // INCR then set the TTL on first hit — a fixed window, which is
+    // sufficient here and cheaper than a sliding log.
+    const res = await fetch(`${url}/pipeline`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([
+        ['INCR', `nhpc:cmp:${key}`],
+        ['EXPIRE', `nhpc:cmp:${key}`, String(WINDOW_SECONDS), 'NX'],
+      ]),
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as Array<{ result: number }>;
+    const count = Number(data?.[0]?.result ?? 0);
+    if (!count) return null;
+    return { ok: count <= LIMIT, remaining: Math.max(0, LIMIT - count), distributed: true };
+  } catch (e) {
+    // A TRANSIENT outage is different from never being configured. A
+    // patient must still be able to report malpractice while Redis is
+    // down, so we fail open here — but loudly, so it is not invisible.
+    console.error('[rate-limit] Upstash unreachable; failing open for this request', e);
+    return null;
+  }
+}
+
+export async function checkRateLimit(ipHash: string): Promise<Result> {
+  const distributed = await upstashLimit(ipHash);
+  return distributed ?? memoryLimit(ipHash);
+}

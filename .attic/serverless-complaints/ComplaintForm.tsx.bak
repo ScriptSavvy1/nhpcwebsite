@@ -1,0 +1,409 @@
+'use client';
+
+import { useRef, useState } from 'react';
+import { AlertTriangle, Phone } from 'lucide-react';
+import type { Bilingual, Lang } from '@/content/types';
+import { t } from '@/lib/i18n';
+import { contact } from '@/content/site';
+import {
+  anonymousCaveat,
+  failureBody,
+  failureHeading,
+  formErrors,
+  formLabels as L,
+  rateLimitedBody,
+  successHeading,
+  successReferenceLabel,
+  successWriteItDown,
+} from '@/content/complaints';
+
+const MAX_FILES = 5;
+const MAX_TOTAL_BYTES = 4 * 1024 * 1024; // matches the API; see route.ts
+const MIN_DESCRIPTION = 50;
+
+type Errors = Record<string, Bilingual>;
+type Status = 'idle' | 'sending' | 'sent' | 'failed' | 'rate_limited';
+
+export default function ComplaintForm({ lang }: { lang: Lang }) {
+  const [anonymous, setAnonymous] = useState(false);
+  const [description, setDescription] = useState('');
+  const [errors, setErrors] = useState<Errors>({});
+  const [status, setStatus] = useState<Status>('idle');
+  const [reference, setReference] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+  const summaryRef = useRef<HTMLDivElement>(null);
+
+  const label = (b: Bilingual) => t(b, lang);
+
+  function validate(fd: FormData): Errors {
+    const next: Errors = {};
+    if (!fd.get('subjectType')) next.subjectType = formErrors.subjectTypeRequired;
+    if (!String(fd.get('subjectName') ?? '').trim()) next.subjectName = formErrors.subjectNameRequired;
+
+    const desc = String(fd.get('description') ?? '').trim();
+    if (!desc) next.description = formErrors.descriptionRequired;
+    else if (desc.length < MIN_DESCRIPTION) next.description = formErrors.descriptionTooShort;
+
+    if (!anonymous) {
+      if (!String(fd.get('complainantName') ?? '').trim()) next.complainantName = formErrors.nameRequired;
+      const phone = String(fd.get('complainantPhone') ?? '').trim();
+      const email = String(fd.get('complainantEmail') ?? '').trim();
+      if (!phone && !email) next.contact = formErrors.contactRequired;
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.complainantEmail = formErrors.emailInvalid;
+    }
+
+    const files = fd.getAll('evidence').filter((f): f is File => f instanceof File && f.size > 0);
+    if (files.length > MAX_FILES) next.evidence = formErrors.filesTooMany;
+    const total = files.reduce((n, f) => n + f.size, 0);
+    if (total > MAX_TOTAL_BYTES) next.evidence = formErrors.filesTooLarge;
+    if (files.some((f) => !/^(image\/|application\/pdf)/i.test(f.type))) next.evidence = formErrors.fileType;
+
+    return next;
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    fd.set('language', lang);
+    fd.set('isAnonymous', String(anonymous));
+
+    const found = validate(fd);
+    setErrors(found);
+    if (Object.keys(found).length > 0) {
+      setStatus('idle');
+      summaryRef.current?.focus();
+      return;
+    }
+
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/complaints', { method: 'POST', body: fd });
+      if (res.status === 429) {
+        setStatus('rate_limited');
+        return;
+      }
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; reference?: string } | null;
+      if (!res.ok || !data?.ok || !data.reference) {
+        setStatus('failed');
+        return;
+      }
+      setReference(data.reference);
+      setStatus('sent');
+      formRef.current?.reset();
+    } catch {
+      // Network failure — the complaint did not reach us. Say so.
+      setStatus('failed');
+    }
+  }
+
+  // ── Sent ───────────────────────────────────────────────────────────
+  if (status === 'sent') {
+    return (
+      <div className="rounded-lg border border-l-[3px] border-nhpc-rule border-l-nhpc-blue bg-white p-6" role="status">
+        <h2 className="text-xl font-bold tracking-tight text-nhpc-dark">{label(successHeading)}</h2>
+        <p className="mt-4 text-sm font-semibold text-nhpc-grey">{label(successReferenceLabel)}</p>
+        <p className="mt-1 text-2xl font-bold tracking-tight text-nhpc-dark">{reference}</p>
+        <p className="mt-3 leading-relaxed text-slate-800">{label(successWriteItDown)}</p>
+      </div>
+    );
+  }
+
+  const errorList = Object.entries(errors);
+
+  return (
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="mt-6">
+      {/* Error summary */}
+      {errorList.length > 0 && (
+        <div
+          ref={summaryRef}
+          tabIndex={-1}
+          role="alert"
+          className="mb-6 border-l-[3px] border-nhpc-red bg-nhpc-wash p-4 outline-none"
+        >
+          <p className="font-semibold text-nhpc-dark">{label(formErrors.fixErrors)}</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-800">
+            {errorList.map(([k, v]) => (
+              <li key={k}>{label(v)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Send failed — never pretend otherwise */}
+      {(status === 'failed' || status === 'rate_limited') && (
+        <div role="alert" className="mb-6 border-l-[3px] border-nhpc-red bg-nhpc-wash p-4">
+          <p className="flex items-center gap-2 font-bold text-nhpc-dark">
+            <AlertTriangle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
+            {status === 'failed' ? label(failureHeading) : label(formErrors.fixErrors)}
+          </p>
+          <p className="mt-2 leading-relaxed text-slate-800">
+            {status === 'failed' ? label(failureBody) : label(rateLimitedBody)}
+          </p>
+          <a
+            href={`tel:${contact.complaintsLine}`}
+            className="mt-3 inline-flex h-11 items-center gap-2 rounded-md border-2 border-nhpc-red px-4 text-sm font-semibold text-nhpc-dark transition-colors duration-150 hover:bg-white"
+          >
+            <Phone className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
+            {lang === 'so' ? 'Wac 2376 — 24/7' : 'Call 2376 — 24/7'}
+          </a>
+        </div>
+      )}
+
+      {/* ── Subject ─────────────────────────────────────────────── */}
+      <Fieldset legend={label(L.legendSubject)}>
+        <fieldset className="mb-4">
+          <legend className="mb-2 text-sm font-semibold text-nhpc-dark">
+            {label(L.subjectType)} <Req lang={lang} />
+          </legend>
+          <div className="space-y-2">
+            {(
+              [
+                ['professional', L.subjectTypeProfessional],
+                ['facility', L.subjectTypeFacility],
+                ['institution', L.subjectTypeInstitution],
+              ] as const
+            ).map(([value, lbl]) => (
+              <label key={value} className="flex items-center gap-2.5 text-slate-800">
+                <input
+                  type="radio"
+                  name="subjectType"
+                  value={value}
+                  className="h-4 w-4 flex-none accent-nhpc-blue"
+                />
+                {label(lbl)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <Field
+          name="subjectName"
+          label={label(L.subjectName)}
+          help={label(L.subjectNameHelp)}
+          required
+          lang={lang}
+          error={errors.subjectName}
+        />
+        <Field
+          name="subjectRegNumber"
+          label={label(L.subjectRegNumber)}
+          help={label(L.subjectRegNumberHelp)}
+          lang={lang}
+        />
+        <Field
+          name="subjectLocation"
+          label={label(L.subjectLocation)}
+          help={label(L.subjectLocationHelp)}
+          lang={lang}
+        />
+      </Fieldset>
+
+      {/* ── Incident ────────────────────────────────────────────── */}
+      <Fieldset legend={label(L.legendIncident)}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field name="incidentDate" type="date" label={label(L.incidentDate)} lang={lang} />
+          <Field name="incidentLocation" label={label(L.incidentLocation)} lang={lang} />
+        </div>
+
+        <div className="mt-4">
+          <label htmlFor="description" className="block text-sm font-semibold text-nhpc-dark">
+            {label(L.description)} <Req lang={lang} />
+          </label>
+          <p id="description-help" className="mt-1 text-sm text-nhpc-grey">
+            {label(L.descriptionHelp)}
+          </p>
+          <textarea
+            id="description"
+            name="description"
+            rows={8}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            aria-describedby="description-help description-count"
+            aria-invalid={errors.description ? true : undefined}
+            className={`mt-2 w-full rounded-md border bg-white p-3 text-slate-800 ${
+              errors.description ? 'border-nhpc-red' : 'border-nhpc-rule'
+            }`}
+          />
+          <p id="description-count" className="mt-1 text-xs text-nhpc-grey">
+            {description.trim().length} / {MIN_DESCRIPTION}
+          </p>
+          {errors.description && <FieldError lang={lang} error={errors.description} />}
+        </div>
+
+        <div className="mt-4">
+          <label htmlFor="desiredOutcome" className="block text-sm font-semibold text-nhpc-dark">
+            {label(L.desiredOutcome)}{' '}
+            <span className="font-normal text-nhpc-grey">({label(L.optional)})</span>
+          </label>
+          <p id="outcome-help" className="mt-1 text-sm text-nhpc-grey">
+            {label(L.desiredOutcomeHelp)}
+          </p>
+          <textarea
+            id="desiredOutcome"
+            name="desiredOutcome"
+            rows={3}
+            aria-describedby="outcome-help"
+            className="mt-2 w-full rounded-md border border-nhpc-rule bg-white p-3 text-slate-800"
+          />
+        </div>
+
+        <div className="mt-4">
+          <label htmlFor="evidence" className="block text-sm font-semibold text-nhpc-dark">
+            {label(L.evidence)}{' '}
+            <span className="font-normal text-nhpc-grey">({label(L.optional)})</span>
+          </label>
+          <p id="evidence-help" className="mt-1 text-sm text-nhpc-grey">
+            {label(L.evidenceHelp)}
+          </p>
+          <input
+            id="evidence"
+            name="evidence"
+            type="file"
+            multiple
+            accept="image/*,application/pdf"
+            aria-describedby="evidence-help"
+            aria-invalid={errors.evidence ? true : undefined}
+            className="mt-2 block w-full text-sm text-slate-800 file:mr-3 file:h-11 file:cursor-pointer file:rounded-md file:border file:border-nhpc-blue file:bg-white file:px-4 file:text-sm file:font-semibold file:text-nhpc-blue"
+          />
+          {errors.evidence && <FieldError lang={lang} error={errors.evidence} />}
+        </div>
+      </Fieldset>
+
+      {/* ── Complainant ─────────────────────────────────────────── */}
+      <Fieldset legend={label(L.legendYou)}>
+        <label className="flex items-start gap-2.5 text-slate-800">
+          <input
+            type="checkbox"
+            checked={anonymous}
+            onChange={(e) => setAnonymous(e.target.checked)}
+            className="mt-1 h-4 w-4 flex-none accent-nhpc-blue"
+          />
+          <span className="font-semibold text-nhpc-dark">{label(L.anonymous)}</span>
+        </label>
+
+        {/* HPCSA's caveat, unsoftened — shown when it is being relied on */}
+        {anonymous && (
+          <div className="mt-3 border-l-[3px] border-nhpc-blue bg-nhpc-wash p-4">
+            <p className="text-sm leading-relaxed text-slate-800">{label(anonymousCaveat)}</p>
+          </div>
+        )}
+
+        {!anonymous && (
+          <div className="mt-4">
+            <Field
+              name="complainantName"
+              label={label(L.yourName)}
+              required
+              lang={lang}
+              error={errors.complainantName}
+            />
+            <p className="mt-4 text-sm text-nhpc-grey">{label(L.contactHelp)}</p>
+            <div className="mt-2 grid gap-4 sm:grid-cols-2">
+              <Field name="complainantPhone" type="tel" label={label(L.yourPhone)} lang={lang} />
+              <Field
+                name="complainantEmail"
+                type="email"
+                label={label(L.yourEmail)}
+                lang={lang}
+                error={errors.complainantEmail}
+              />
+            </div>
+            {errors.contact && <FieldError lang={lang} error={errors.contact} />}
+
+            <fieldset className="mt-4">
+              <legend className="mb-2 text-sm font-semibold text-nhpc-dark">
+                {label(L.isPatient)}
+              </legend>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2.5 text-slate-800">
+                  <input type="radio" name="isPatient" value="Yes — the complainant is the patient" className="h-4 w-4 flex-none accent-nhpc-blue" />
+                  {label(L.isPatientYes)}
+                </label>
+                <label className="flex items-center gap-2.5 text-slate-800">
+                  <input type="radio" name="isPatient" value="Filing on behalf of someone else" className="h-4 w-4 flex-none accent-nhpc-blue" />
+                  {label(L.isPatientNo)}
+                </label>
+              </div>
+            </fieldset>
+          </div>
+        )}
+      </Fieldset>
+
+      <button
+        type="submit"
+        disabled={status === 'sending'}
+        className="inline-flex h-11 items-center justify-center rounded-md bg-nhpc-blue px-6 text-sm font-semibold text-white transition-colors duration-150 hover:bg-nhpc-dark disabled:opacity-60"
+      >
+        {status === 'sending' ? label(L.submitting) : label(L.submit)}
+      </button>
+    </form>
+  );
+}
+
+// ── Small local primitives (no form library) ─────────────────────────
+
+function Req({ lang }: { lang: Lang }) {
+  return (
+    <span className="font-normal text-nhpc-grey">
+      ({lang === 'so' ? 'waa loo baahan yahay' : 'required'})
+    </span>
+  );
+}
+
+function Fieldset({ legend, children }: { legend: string; children: React.ReactNode }) {
+  return (
+    <fieldset className="mb-8">
+      <legend className="mb-4 w-full border-l-4 border-nhpc-red bg-nhpc-blue px-4 py-2.5 text-sm font-semibold text-white">
+        {legend}
+      </legend>
+      {children}
+    </fieldset>
+  );
+}
+
+function FieldError({ lang, error }: { lang: Lang; error: Bilingual }) {
+  return <p className="mt-1.5 text-sm font-semibold text-nhpc-dark">{t(error, lang)}</p>;
+}
+
+function Field({
+  name,
+  label,
+  help,
+  type = 'text',
+  required,
+  lang,
+  error,
+}: {
+  name: string;
+  label: string;
+  help?: string;
+  type?: string;
+  required?: boolean;
+  lang: Lang;
+  error?: Bilingual;
+}) {
+  const helpId = help ? `${name}-help` : undefined;
+  return (
+    <div className="mt-4 first:mt-0">
+      <label htmlFor={name} className="block text-sm font-semibold text-nhpc-dark">
+        {label} {required ? <Req lang={lang} /> : null}
+      </label>
+      {help && (
+        <p id={helpId} className="mt-1 text-sm text-nhpc-grey">
+          {help}
+        </p>
+      )}
+      <input
+        id={name}
+        name={name}
+        type={type}
+        aria-describedby={helpId}
+        aria-invalid={error ? true : undefined}
+        className={`mt-2 h-11 w-full rounded-md border bg-white px-3 text-slate-800 ${
+          error ? 'border-nhpc-red' : 'border-nhpc-rule'
+        }`}
+      />
+      {error && <FieldError lang={lang} error={error} />}
+    </div>
+  );
+}

@@ -1,0 +1,170 @@
+import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
+import { checkRateLimit, clientIpFrom, hashIp } from '@/lib/rate-limit';
+import {
+  buildAcknowledgementEmail,
+  buildComplaintHtml,
+  buildComplaintText,
+  emailSubject,
+  generateReference,
+  type ComplaintRecord,
+} from '@/lib/complaint-email';
+
+// This route needs a server runtime (the rest of the site is static).
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+// Vercel serverless functions reject request bodies over 4.5MB at the
+// platform edge — our code would never run. We cap total attachments at
+// 4MB so a legitimate submission cannot be killed by the platform.
+const MAX_TOTAL_BYTES = 4 * 1024 * 1024;
+const MAX_FILES = 5;
+const MIN_DESCRIPTION = 50;
+const ALLOWED = /^(image\/(jpeg|jpg|png|webp|gif|heic|heif)|application\/pdf)$/i;
+
+function str(form: FormData, key: string): string {
+  const v = form.get(key);
+  return typeof v === 'string' ? v.trim() : '';
+}
+
+function sizeLabel(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+export async function POST(request: Request) {
+  // ── Refuse rather than accept what we cannot deliver ───────────────
+  // With no database, an unconfigured mailer means the complaint would
+  // vanish. Fail loudly and send the person to 2376.
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = process.env.COMPLAINTS_TO ?? 'info@nhpc.gov.so';
+  const from = process.env.COMPLAINTS_FROM ?? 'NHPC Complaints <onboarding@resend.dev>';
+  if (!apiKey) {
+    console.error('[complaints] RESEND_API_KEY is not set — refusing submission.');
+    return NextResponse.json({ error: 'send_failed' }, { status: 503 });
+  }
+
+  // ── Rate limit: 5/hour per IP. The raw IP is hashed immediately and
+  //    never stored or logged. ─────────────────────────────────────────
+  const ipHash = hashIp(clientIpFrom(request.headers));
+  const rate = await checkRateLimit(ipHash);
+  if (!rate.ok) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
+
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return NextResponse.json({ error: 'bad_request' }, { status: 400 });
+  }
+
+  // ── Parse ─────────────────────────────────────────────────────────
+  const subjectType = str(form, 'subjectType');
+  const description = str(form, 'description');
+  const isAnonymous = str(form, 'isAnonymous') === 'true';
+  const complainantName = str(form, 'complainantName');
+  const complainantPhone = str(form, 'complainantPhone');
+  const complainantEmail = str(form, 'complainantEmail');
+  const language = str(form, 'language') === 'so' ? 'so' : 'en';
+
+  // ── Validate (mirrors the client; the client is not trusted) ───────
+  const errors: string[] = [];
+  if (!['professional', 'facility', 'institution'].includes(subjectType)) errors.push('subjectType');
+  if (!str(form, 'subjectName')) errors.push('subjectName');
+  if (description.length < MIN_DESCRIPTION) errors.push('description');
+  if (!isAnonymous) {
+    if (!complainantName) errors.push('complainantName');
+    if (!complainantPhone && !complainantEmail) errors.push('contact');
+  }
+  if (complainantEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(complainantEmail)) {
+    errors.push('complainantEmail');
+  }
+
+  const files = form.getAll('evidence').filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length > MAX_FILES) errors.push('files');
+  let total = 0;
+  for (const f of files) {
+    total += f.size;
+    if (!ALLOWED.test(f.type)) errors.push('fileType');
+  }
+  if (total > MAX_TOTAL_BYTES) errors.push('filesSize');
+
+  if (errors.length > 0) {
+    return NextResponse.json({ error: 'validation', fields: errors }, { status: 400 });
+  }
+
+  // ── Build the record ──────────────────────────────────────────────
+  const reference = generateReference();
+  const record: ComplaintRecord = {
+    reference,
+    receivedAt: new Date(),
+    language,
+    subjectType: subjectType as ComplaintRecord['subjectType'],
+    subjectName: str(form, 'subjectName'),
+    subjectRegNumber: str(form, 'subjectRegNumber'),
+    subjectLocation: str(form, 'subjectLocation'),
+    incidentDate: str(form, 'incidentDate'),
+    incidentLocation: str(form, 'incidentLocation'),
+    description,
+    desiredOutcome: str(form, 'desiredOutcome'),
+    isAnonymous,
+    complainantName: isAnonymous ? '' : complainantName,
+    complainantPhone: isAnonymous ? '' : complainantPhone,
+    complainantEmail: isAnonymous ? '' : complainantEmail,
+    isPatient: isAnonymous ? '' : str(form, 'isPatient'),
+    attachments: files.map((f) => ({ filename: f.name, sizeLabel: sizeLabel(f.size) })),
+  };
+
+  const attachments = await Promise.all(
+    files.map(async (f) => ({
+      filename: f.name,
+      content: Buffer.from(await f.arrayBuffer()),
+    })),
+  );
+
+  // ── Send. This is the only delivery: if it fails, the complaint is
+  //    gone. Never report success on a failed send. ──────────────────
+  const resend = new Resend(apiKey);
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to: [to],
+      replyTo: record.complainantEmail || undefined,
+      subject: emailSubject(record),
+      text: buildComplaintText(record),
+      html: buildComplaintHtml(record),
+      attachments: attachments.length > 0 ? attachments : undefined,
+    });
+
+    if (error) {
+      // Log the reference, never the complainant's details.
+      console.error('[complaints] Resend rejected the case email', reference, error.message);
+      return NextResponse.json({ error: 'send_failed' }, { status: 502 });
+    }
+  } catch (e) {
+    console.error('[complaints] Case email threw', reference, e instanceof Error ? e.message : e);
+    return NextResponse.json({ error: 'send_failed' }, { status: 502 });
+  }
+
+  // ── Copy to the complainant, if they gave an email. Best-effort: the
+  //    case email is already delivered, so a failure here must NOT be
+  //    reported as a failed complaint. ──────────────────────────────
+  if (!isAnonymous && record.complainantEmail) {
+    try {
+      const ack = buildAcknowledgementEmail(record);
+      await resend.emails.send({
+        from,
+        to: [record.complainantEmail],
+        subject: ack.subject,
+        text: ack.text,
+        html: ack.html,
+      });
+    } catch (e) {
+      console.error('[complaints] Acknowledgement copy failed', reference, e instanceof Error ? e.message : e);
+    }
+  }
+
+  return NextResponse.json({ ok: true, reference }, { status: 200 });
+}

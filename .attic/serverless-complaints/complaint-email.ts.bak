@@ -1,0 +1,286 @@
+import { randomInt } from 'crypto';
+
+// ─────────────────────────────────────────────────────────────────────
+// With no database, this email IS the case file. It is read by council
+// staff, not developers: plain language, obvious structure, everything
+// on the page. If a field is empty we say so rather than omitting the
+// row, so a reader can tell "not provided" from "we forgot to ask".
+// ─────────────────────────────────────────────────────────────────────
+
+export type ComplaintRecord = {
+  reference: string;
+  receivedAt: Date;
+  language: 'en' | 'so';
+  subjectType: 'professional' | 'facility' | 'institution';
+  subjectName: string;
+  subjectRegNumber: string;
+  subjectLocation: string;
+  incidentDate: string;
+  incidentLocation: string;
+  description: string;
+  desiredOutcome: string;
+  isAnonymous: boolean;
+  complainantName: string;
+  complainantPhone: string;
+  complainantEmail: string;
+  isPatient: string;
+  attachments: { filename: string; sizeLabel: string }[];
+};
+
+/**
+ * NHPC-CMP-2026-0001
+ *
+ * HONEST NOTE: the 4-digit suffix is NOT sequential. With no database
+ * there is no counter to increment, and serverless instances share no
+ * state — so it is random. Two complaints can, eventually, collide.
+ *
+ * This reference is ONLY a human handle for phone follow-up on 2376. It
+ * is NOT a lookup key: nothing can be retrieved with it, and there is no
+ * status endpoint (deliberately — one would leak the existence of cases
+ * to anyone who guessed a reference). Staff find a case by searching the
+ * inbox for the reference; the email carries the full record and its
+ * timestamp, which is what disambiguates a collision.
+ */
+export function generateReference(now = new Date()): string {
+  const year = now.getUTCFullYear();
+  const suffix = String(randomInt(0, 10000)).padStart(4, '0');
+  return `NHPC-CMP-${year}-${suffix}`;
+}
+
+const subjectTypeLabel: Record<ComplaintRecord['subjectType'], string> = {
+  professional: 'Health professional',
+  facility: 'Health facility',
+  institution: 'Health education institution',
+};
+
+function orNotProvided(value: string): string {
+  const v = value.trim();
+  return v.length > 0 ? v : 'Not provided';
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+export function emailSubject(rec: ComplaintRecord): string {
+  return `[${rec.reference}] Complaint — ${subjectTypeLabel[rec.subjectType]}: ${rec.subjectName}`;
+}
+
+export function buildComplaintText(rec: ComplaintRecord): string {
+  const complainant = rec.isAnonymous
+    ? 'ANONYMOUS — the complainant did not give their details.\n  We cannot contact them or update them on progress.'
+    : [
+        `Name:   ${orNotProvided(rec.complainantName)}`,
+        `Phone:  ${orNotProvided(rec.complainantPhone)}`,
+        `Email:  ${orNotProvided(rec.complainantEmail)}`,
+        `Is the patient: ${orNotProvided(rec.isPatient)}`,
+      ].join('\n  ');
+
+  const attachments =
+    rec.attachments.length > 0
+      ? rec.attachments.map((a) => `- ${a.filename} (${a.sizeLabel})`).join('\n  ')
+      : 'None';
+
+  return `NHPC COMPLAINT — ${rec.reference}
+
+Received:  ${rec.receivedAt.toUTCString()}
+Language:  ${rec.language === 'so' ? 'Somali' : 'English'}
+Reference: ${rec.reference}
+
+------------------------------------------------------------
+SUBJECT OF THE COMPLAINT
+------------------------------------------------------------
+  Type:               ${subjectTypeLabel[rec.subjectType]}
+  Name:               ${orNotProvided(rec.subjectName)}
+  Registration no.:   ${orNotProvided(rec.subjectRegNumber)}
+  Location:           ${orNotProvided(rec.subjectLocation)}
+
+------------------------------------------------------------
+THE INCIDENT
+------------------------------------------------------------
+  Date:      ${orNotProvided(rec.incidentDate)}
+  Location:  ${orNotProvided(rec.incidentLocation)}
+
+------------------------------------------------------------
+WHAT HAPPENED (in the complainant's own words)
+------------------------------------------------------------
+${rec.description}
+
+------------------------------------------------------------
+DESIRED OUTCOME
+------------------------------------------------------------
+${orNotProvided(rec.desiredOutcome)}
+
+------------------------------------------------------------
+COMPLAINANT
+------------------------------------------------------------
+  ${complainant}
+
+------------------------------------------------------------
+ATTACHMENTS
+------------------------------------------------------------
+  ${attachments}
+
+------------------------------------------------------------
+NEXT STEP: acknowledge within 7 days, quoting ${rec.reference}.
+This email is the case record — there is no database behind it.
+`;
+}
+
+export function buildComplaintHtml(rec: ComplaintRecord): string {
+  const row = (label: string, value: string) =>
+    `<tr>
+       <td style="padding:6px 12px 6px 0;color:#4A5568;white-space:nowrap;vertical-align:top;">${escapeHtml(label)}</td>
+       <td style="padding:6px 0;color:#1a202c;vertical-align:top;">${escapeHtml(value)}</td>
+     </tr>`;
+
+  const section = (title: string, inner: string) =>
+    `<h2 style="margin:28px 0 8px;padding:8px 12px;background:#0055AA;border-left:4px solid #FF0018;color:#fff;font:600 14px/1.4 system-ui,sans-serif;">${escapeHtml(title)}</h2>${inner}`;
+
+  const complainantInner = rec.isAnonymous
+    ? `<p style="margin:0;padding:12px;background:#EFF4F9;border-left:3px solid #FF0018;color:#1a202c;font:14px/1.6 system-ui,sans-serif;">
+         <strong>ANONYMOUS</strong> — the complainant did not give their details.
+         We cannot contact them or update them on progress.
+       </p>`
+    : `<table style="border-collapse:collapse;font:14px/1.5 system-ui,sans-serif;">
+         ${row('Name', orNotProvided(rec.complainantName))}
+         ${row('Phone', orNotProvided(rec.complainantPhone))}
+         ${row('Email', orNotProvided(rec.complainantEmail))}
+         ${row('Is the patient', orNotProvided(rec.isPatient))}
+       </table>`;
+
+  const attachmentsInner =
+    rec.attachments.length > 0
+      ? `<ul style="margin:0;padding-left:20px;color:#1a202c;font:14px/1.7 system-ui,sans-serif;">
+           ${rec.attachments.map((a) => `<li>${escapeHtml(a.filename)} <span style="color:#4A5568;">(${escapeHtml(a.sizeLabel)})</span></li>`).join('')}
+         </ul>`
+      : `<p style="margin:0;color:#4A5568;font:14px/1.6 system-ui,sans-serif;">None</p>`;
+
+  return `<!doctype html>
+<html><body style="margin:0;padding:24px;background:#fff;">
+  <div style="max-width:680px;margin:0 auto;">
+    <div style="height:3px;display:flex;"><div style="width:62%;background:#0055AA;"></div><div style="width:38%;background:#FF0018;"></div></div>
+
+    <h1 style="margin:20px 0 4px;color:#003D7A;font:700 22px/1.3 system-ui,sans-serif;">NHPC Complaint</h1>
+    <p style="margin:0 0 20px;color:#4A5568;font:14px/1.5 system-ui,sans-serif;">
+      Reference <strong style="color:#003D7A;">${escapeHtml(rec.reference)}</strong> ·
+      Received ${escapeHtml(rec.receivedAt.toUTCString())} ·
+      Filed in ${rec.language === 'so' ? 'Somali' : 'English'}
+    </p>
+
+    ${section(
+      'Subject of the complaint',
+      `<table style="border-collapse:collapse;font:14px/1.5 system-ui,sans-serif;">
+         ${row('Type', subjectTypeLabel[rec.subjectType])}
+         ${row('Name', orNotProvided(rec.subjectName))}
+         ${row('Registration no.', orNotProvided(rec.subjectRegNumber))}
+         ${row('Location', orNotProvided(rec.subjectLocation))}
+       </table>`,
+    )}
+
+    ${section(
+      'The incident',
+      `<table style="border-collapse:collapse;font:14px/1.5 system-ui,sans-serif;">
+         ${row('Date', orNotProvided(rec.incidentDate))}
+         ${row('Location', orNotProvided(rec.incidentLocation))}
+       </table>`,
+    )}
+
+    ${section(
+      "What happened (in the complainant's own words)",
+      `<p style="margin:0;padding:12px;background:#EFF4F9;border-left:3px solid #0055AA;color:#1a202c;font:14px/1.7 system-ui,sans-serif;white-space:pre-wrap;">${escapeHtml(rec.description)}</p>`,
+    )}
+
+    ${section(
+      'Desired outcome',
+      `<p style="margin:0;color:#1a202c;font:14px/1.7 system-ui,sans-serif;white-space:pre-wrap;">${escapeHtml(orNotProvided(rec.desiredOutcome))}</p>`,
+    )}
+
+    ${section('Complainant', complainantInner)}
+    ${section('Attachments', attachmentsInner)}
+
+    <p style="margin:28px 0 0;padding:12px;background:#EFF4F9;border-left:3px solid #0055AA;color:#1a202c;font:14px/1.6 system-ui,sans-serif;">
+      <strong>Next step:</strong> acknowledge within 7 days, quoting ${escapeHtml(rec.reference)}.<br>
+      This email is the case record — there is no database behind it.
+    </p>
+  </div>
+</body></html>`;
+}
+
+/** Confirmation sent to the complainant, in the language they filed in. */
+export function buildAcknowledgementEmail(rec: ComplaintRecord): {
+  subject: string;
+  text: string;
+  html: string;
+} {
+  const so = rec.language === 'so';
+  const subject = so
+    ? `[${rec.reference}] Waan helnay cabashadaada — NHPC`
+    : `[${rec.reference}] We have received your complaint — NHPC`;
+
+  const text = so
+    ? `Waan helnay cabashadaada.
+
+Lambarkaaga tixraaca: ${rec.reference}
+Lambarkan qor. Sheeg haddii aad naga soo wacdo 2376.
+
+Waxaan ku soo celin doonaa xaqiijin 7 maalmood gudahood.
+
+Ogow: NHPC lama siin karo magdhow lacageed. Haddii aad doonayso magdhow, u tag maxkamadda. Labadaba isku mar ayaad u socodsiin kartaa.
+
+NHPC marnaba kuma codsado lacag ku bixi akoon shakhsi ah.
+
+Golaha Mihnadlayaasha Caafimaadka Qaranka
+info@nhpc.gov.so · Khadka cabashooyinka 24/7: 2376`
+    : `We have received your complaint.
+
+Your reference number: ${rec.reference}
+Write this number down. Quote it if you call us on 2376.
+
+We will send you an acknowledgement within 7 days.
+
+Please note: NHPC cannot award you compensation or damages. If you seek financial restitution, that is a matter for the courts. You may pursue both at the same time.
+
+NHPC never requests payment via personal accounts.
+
+National Health Professionals Council
+info@nhpc.gov.so · 24/7 complaints line: 2376`;
+
+  const html = `<!doctype html>
+<html><body style="margin:0;padding:24px;background:#fff;">
+  <div style="max-width:560px;margin:0 auto;">
+    <div style="height:3px;display:flex;"><div style="width:62%;background:#0055AA;"></div><div style="width:38%;background:#FF0018;"></div></div>
+    <h1 style="margin:20px 0 12px;color:#003D7A;font:700 20px/1.3 system-ui,sans-serif;">
+      ${so ? 'Waan helnay cabashadaada' : 'We have received your complaint'}
+    </h1>
+    <p style="margin:0 0 16px;padding:12px;background:#EFF4F9;border-left:3px solid #0055AA;font:14px/1.6 system-ui,sans-serif;color:#1a202c;">
+      ${so ? 'Lambarkaaga tixraaca' : 'Your reference number'}:
+      <strong style="color:#003D7A;font-size:16px;">${escapeHtml(rec.reference)}</strong><br>
+      ${so ? 'Lambarkan qor. Sheeg haddii aad naga soo wacdo 2376.' : 'Write this number down. Quote it if you call us on 2376.'}
+    </p>
+    <p style="margin:0 0 16px;color:#1a202c;font:14px/1.6 system-ui,sans-serif;">
+      ${so ? 'Waxaan ku soo celin doonaa xaqiijin 7 maalmood gudahood.' : 'We will send you an acknowledgement within 7 days.'}
+    </p>
+    <p style="margin:0 0 16px;color:#1a202c;font:14px/1.6 system-ui,sans-serif;">
+      ${
+        so
+          ? 'Ogow: NHPC lama siin karo magdhow lacageed. Haddii aad doonayso magdhow, u tag maxkamadda. Labadaba isku mar ayaad u socodsiin kartaa.'
+          : 'Please note: NHPC cannot award you compensation or damages. If you seek financial restitution, that is a matter for the courts. You may pursue both at the same time.'
+      }
+    </p>
+    <p style="margin:0 0 16px;padding:12px;border-left:3px solid #FF0018;background:#EFF4F9;color:#1a202c;font:600 13px/1.6 system-ui,sans-serif;">
+      ${so ? 'NHPC marnaba kuma codsado lacag ku bixi akoon shakhsi ah.' : 'NHPC never requests payment via personal accounts.'}
+    </p>
+    <p style="margin:24px 0 0;color:#4A5568;font:12px/1.6 system-ui,sans-serif;">
+      Golaha Mihnadlayaasha Caafimaadka Qaranka · National Health Professionals Council<br>
+      info@nhpc.gov.so · ${so ? 'Khadka cabashooyinka 24/7' : '24/7 complaints line'}: 2376
+    </p>
+  </div>
+</body></html>`;
+
+  return { subject, text, html };
+}
