@@ -71,6 +71,22 @@ export type DisciplinaryOutcome = {
   article: Bilingual;
 };
 
+/** A scheduled council examination.
+ *
+ *  Do NOT invent sittings, dates, venues or deadlines. An exam deadline is
+ *  something a candidate plans their year around; a wrong one is worse than
+ *  no table at all. */
+export type ExamSitting = {
+  exam: Bilingual;
+  cadre: Bilingual;
+  /** ISO date of the sitting. */
+  date: string;
+  /** ISO date registration closes. */
+  registrationDeadline: string;
+  venue: Bilingual;
+  status: 'open' | 'closed';
+};
+
 export type NoticeType = 'notice' | 'exam' | 'cpd' | 'disciplinary' | 'press';
 
 export type Notice = {

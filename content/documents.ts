@@ -1,4 +1,15 @@
-import type { DocumentEntry } from './types';
+import type { Bilingual, DocumentEntry } from './types';
+
+export type DocCategory = DocumentEntry['category'];
+
+export const categoryLabels: Record<DocCategory | 'all', Bilingual> = {
+  all: { en: 'All', so: 'Dhammaan' },
+  act: { en: 'The Act', so: 'Sharciga' },
+  professionals: { en: 'Professionals', so: 'Mihnadlayaasha' },
+  facilities: { en: 'Facilities', so: 'Xarumaha' },
+  standards: { en: 'Standards', so: 'Heerarka' },
+  forms: { en: 'Forms', so: 'Foomamka' },
+};
 
 // Typed inventory of hosted PDFs. Add a PDF here and it appears in the
 // /resources hub and any DocumentCard grid — components never change.
