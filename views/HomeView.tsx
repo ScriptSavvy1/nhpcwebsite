@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShieldCheck, UserPlus, AlertTriangle, ArrowRight } from 'lucide-react';
 import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
@@ -22,28 +23,31 @@ export default function HomeView({ lang }: { lang: Lang }) {
 
   return (
     <>
-      {/* Hero — diagonal blue gradient over nhpc-dark (no photo, no logo). The
-          blue fades to transparent toward the left; a dot-grid texture and a
-          soft glow fill the left so it doesn't read empty. White text clears
-          AA over the whole field. */}
-      <section className="relative overflow-hidden bg-nhpc-dark text-white">
-        {/* Dot-grid texture — subtle, fills the empty space (esp. the left). */}
+      {/* Hero — a SUBTLE single-hue deepening (nhpc-blue #0055AA at top-left to
+          nhpc-dark #003D7A at bottom-right), dot texture on top, and the
+          Federal Republic of Somalia coat of arms as a faint watermark bleeding
+          off the right (it signals state authority under Act Lr.31). One mark
+          only — the NHPC seal stays in the header. */}
+      <section className="relative overflow-hidden text-white [background:linear-gradient(135deg,#0055AA_0%,#003D7A_100%)]">
+        {/* Dot-grid texture, on top of the deepening. */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1.5px)] [background-size:22px_22px]"
         />
-        {/* Diagonal blue, fading to transparent toward the top-left. */}
-        <div
+        {/* Coat of arms watermark — right, bleeding off the edge, faint white
+            monochrome. Hidden below lg so it never crowds the text on phones.
+            Placeholder asset (public-domain emblem); swap in the final file at
+            the same path. */}
+        <Image
+          src="/somalia-coat-of-arms.svg"
+          alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 [background:linear-gradient(110deg,transparent_38%,rgba(0,85,170,0.85)_100%)]"
-        />
-        {/* Soft glow lifting the left, where the text sits. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-24 top-1/2 h-[440px] w-[440px] -translate-y-1/2 rounded-full bg-nhpc-blue/25 blur-[120px]"
+          width={1240}
+          height={1000}
+          className="pointer-events-none absolute right-0 top-1/2 hidden h-[520px] w-auto -translate-y-1/2 translate-x-[28%] select-none opacity-[0.08] [filter:brightness(0)_invert(1)] lg:block"
         />
 
-        <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
+        <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 md:py-28">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
               {t(heroKicker, lang)}
