@@ -1,6 +1,6 @@
 import type { Bilingual, NavItem } from './types';
 
-export const PORTAL_URL = 'https://portal.nhpc.gov.so';
+export const PORTAL_URL = 'https://ehr.so';
 
 export const orgName: Bilingual = {
   en: 'National Health Professionals Council',
