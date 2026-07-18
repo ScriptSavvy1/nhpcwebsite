@@ -1,9 +1,8 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ShieldCheck, UserPlus, AlertTriangle, ArrowRight } from 'lucide-react';
 import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
-import { orgName, missionShort } from '@/content/site';
+import { missionShort } from '@/content/site';
 import {
   heroHeading,
   heroKicker,
@@ -23,18 +22,31 @@ export default function HomeView({ lang }: { lang: Lang }) {
 
   return (
     <>
-      {/* Hero — deep nhpc-dark band. Blue-dominant; no photography. The seal
-          sits on a white circular plate (never bare on a blue surface). */}
-      <section className="bg-nhpc-dark text-white">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 md:grid-cols-[1fr_auto] md:items-center md:gap-12 md:py-24">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">
+      {/* Hero — angled two-tone blue split. Two SOLID brand blues meeting on a
+          hard diagonal (no gradient, no photo, no logo). White text clears AA
+          on both blues, so it can span the seam. */}
+      <section className="relative overflow-hidden bg-nhpc-dark text-white">
+        {/* Angled nhpc-blue panel on the right. Hidden on the smallest phones,
+            where the plain dark field reads cleaner. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-y-0 right-0 hidden w-1/2 bg-nhpc-blue [clip-path:polygon(28%_0%,100%_0%,100%_100%,0%_100%)] sm:block"
+        />
+        {/* Thin light line along the seam for a crisp edge between the blues. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-y-0 right-0 hidden w-1/2 bg-white/15 [clip-path:polygon(28%_0%,29.5%_0%,1.5%_100%,0%_100%)] md:block"
+        />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
               {t(heroKicker, lang)}
             </p>
-            <h1 className="mt-3 max-w-2xl text-4xl font-bold leading-tight tracking-tight text-white md:text-5xl">
+            <h1 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl lg:text-6xl">
               {t(heroHeading, lang)}
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 md:text-lg">
               {t(missionShort, lang)}
             </p>
 
@@ -55,21 +67,6 @@ export default function HomeView({ lang }: { lang: Lang }) {
                 <AlertTriangle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
                 {lang === 'so' ? 'Soo Sheeg Xad-gudub' : 'Report Malpractice'}
               </CtaButton>
-            </div>
-          </div>
-
-          {/* Seal on a white plate — the required treatment on a blue surface.
-              Above the text on mobile, to the side on desktop. */}
-          <div className="order-first flex justify-center md:order-none md:justify-end">
-            <div className="rounded-full bg-white p-4 md:p-5">
-              <Image
-                src="/nhpc-stamp.png"
-                alt={t(orgName, lang) + ' — official seal'}
-                width={176}
-                height={176}
-                priority
-                className="h-28 w-28 md:h-44 md:w-44"
-              />
             </div>
           </div>
         </div>
