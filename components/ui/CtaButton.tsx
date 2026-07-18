@@ -14,10 +14,21 @@ const variants: Record<Variant, string> = {
   danger: 'border-2 border-nhpc-red text-nhpc-dark hover:bg-nhpc-wash',
 };
 
+// Same buttons, sitting on a nhpc-dark surface (the hero / About band).
+// primary inverts to white-on-dark for contrast; outline/danger keep their
+// shape with light strokes. danger stays OUTLINE-only — red discipline holds.
+const darkVariants: Record<Variant, string> = {
+  primary: 'bg-white text-nhpc-dark hover:bg-nhpc-wash',
+  outline: 'border border-white/70 text-white hover:bg-white/10',
+  danger: 'border-2 border-nhpc-red text-white hover:bg-white/10',
+};
+
 type Props = {
   href: string;
   variant?: Variant;
   external?: boolean;
+  /** Render for placement on a nhpc-dark surface. */
+  onDark?: boolean;
   children: ReactNode;
   className?: string;
   'aria-label'?: string;
@@ -27,11 +38,13 @@ export default function CtaButton({
   href,
   variant = 'primary',
   external = false,
+  onDark = false,
   children,
   className = '',
   ...rest
 }: Props) {
-  const cls = `${base} ${variants[variant]} ${className}`.trim();
+  const styles = onDark ? darkVariants : variants;
+  const cls = `${base} ${styles[variant]} ${className}`.trim();
 
   if (external) {
     return (
