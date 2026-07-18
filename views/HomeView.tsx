@@ -22,20 +22,25 @@ export default function HomeView({ lang }: { lang: Lang }) {
 
   return (
     <>
-      {/* Hero — angled two-tone blue split. Two SOLID brand blues meeting on a
-          hard diagonal (no gradient, no photo, no logo). White text clears AA
-          on both blues, so it can span the seam. */}
+      {/* Hero — diagonal blue gradient over nhpc-dark (no photo, no logo). The
+          blue fades to transparent toward the left; a dot-grid texture and a
+          soft glow fill the left so it doesn't read empty. White text clears
+          AA over the whole field. */}
       <section className="relative overflow-hidden bg-nhpc-dark text-white">
-        {/* Angled nhpc-blue panel on the right. Hidden on the smallest phones,
-            where the plain dark field reads cleaner. */}
+        {/* Dot-grid texture — subtle, fills the empty space (esp. the left). */}
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 right-0 hidden w-1/2 bg-nhpc-blue [clip-path:polygon(28%_0%,100%_0%,100%_100%,0%_100%)] sm:block"
+          className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1.5px)] [background-size:22px_22px]"
         />
-        {/* Thin light line along the seam for a crisp edge between the blues. */}
+        {/* Diagonal blue, fading to transparent toward the top-left. */}
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 right-0 hidden w-1/2 bg-white/15 [clip-path:polygon(28%_0%,29.5%_0%,1.5%_100%,0%_100%)] md:block"
+          className="pointer-events-none absolute inset-0 [background:linear-gradient(110deg,transparent_38%,rgba(0,85,170,0.85)_100%)]"
+        />
+        {/* Soft glow lifting the left, where the text sits. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-24 top-1/2 h-[440px] w-[440px] -translate-y-1/2 rounded-full bg-nhpc-blue/25 blur-[120px]"
         />
 
         <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
