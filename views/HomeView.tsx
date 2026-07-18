@@ -34,17 +34,18 @@ export default function HomeView({ lang }: { lang: Lang }) {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1.5px)] [background-size:22px_22px]"
         />
-        {/* Coat of arms watermark — right, bleeding off the edge, faint white
-            monochrome. Hidden below lg so it never crowds the text on phones.
-            Placeholder asset (public-domain emblem); swap in the final file at
-            the same path. */}
+        {/* Coat of arms watermark — right, bleeding off the edge, faint. Full
+            colour: at low opacity over the blue it reads as a tonal, blue-
+            tinted emblem. Hidden below lg so it never crowds the text on
+            phones. Placeholder asset (public-domain emblem); swap in the final
+            file at the same path. */}
         <Image
           src="/somalia-coat-of-arms.svg"
           alt=""
           aria-hidden="true"
           width={1240}
           height={1000}
-          className="pointer-events-none absolute right-0 top-1/2 hidden h-[520px] w-auto -translate-y-1/2 translate-x-[28%] select-none opacity-[0.08] [filter:brightness(0)_invert(1)] lg:block"
+          className="pointer-events-none absolute right-0 top-1/2 hidden h-[520px] w-auto -translate-y-1/2 translate-x-[28%] select-none opacity-[0.14] lg:block"
         />
 
         <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 md:py-28">
