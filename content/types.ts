@@ -12,8 +12,11 @@ export type DocLanguage = 'SO' | 'EN' | 'SO/EN';
 
 export type NavItem = {
   label: Bilingual;
-  /** Path WITHOUT the /[lang] prefix, e.g. "/public/complaints". */
+  /** Path WITHOUT the /[lang] prefix, e.g. "/public/complaints". When
+   *  `external` is true this is instead a full URL (e.g. the portal). */
   href: string;
+  /** Link to an external URL (opens in a new tab); skip the /[lang] prefix. */
+  external?: boolean;
   children?: NavItem[];
 };
 

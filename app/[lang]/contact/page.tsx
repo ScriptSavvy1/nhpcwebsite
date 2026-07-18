@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Mail, MessageCircle, Phone, Clock, MapPin, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Mail, MessageCircle, Phone, Clock, MapPin, ArrowRight, ExternalLink } from 'lucide-react';
 import { isLang, t, localizedHref } from '@/lib/i18n';
 import type { Lang } from '@/content/types';
-import { contact, fraudWarning } from '@/content/site';
+import { contact, fraudWarning, PORTAL_URL } from '@/content/site';
 import PageHeader from '@/components/ui/PageHeader';
 import SectionBand from '@/components/ui/SectionBand';
 
@@ -131,8 +131,10 @@ export default function ContactPage({ params }: { params: { lang: string } }) {
           </SectionBand>
           <ul className="mt-5 space-y-3">
             <li>
-              <Link
-                href={localizedHref('/public/complaints', lang)}
+              <a
+                href={PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group flex items-start justify-between gap-3 rounded-lg border border-l-[3px] border-nhpc-rule border-l-nhpc-blue p-4 transition-colors duration-150 hover:border-nhpc-blue"
               >
                 <span>
@@ -141,15 +143,15 @@ export default function ContactPage({ params }: { params: { lang: string } }) {
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-nhpc-grey">
                     {so
-                      ? 'Cabasho ku saabsan mihnadle ama xarun — jid gaar ah ayay leedahay.'
-                      : 'A complaint about a professional or facility has its own dedicated route.'}
+                      ? 'Cabasho ku saabsan mihnadle ama xarun — waxaa laga gudbiyaa bogga NHPC.'
+                      : 'Complaints about a professional or facility are filed on the NHPC portal.'}
                   </p>
                 </span>
-                <ArrowRight
+                <ExternalLink
                   className="mt-1 h-4 w-4 flex-none text-nhpc-grey transition-colors duration-150 group-hover:text-nhpc-blue"
                   aria-hidden="true"
                 />
-              </Link>
+              </a>
             </li>
             <li>
               <Link
@@ -178,8 +180,7 @@ export default function ContactPage({ params }: { params: { lang: string } }) {
         {/* Fraud guard — both languages, always. */}
         <section className="pt-10 pb-4" aria-labelledby="fraud-heading">
           <SectionBand id="fraud-heading">{so ? 'Digniin khiyaano' : 'Fraud warning'}</SectionBand>
-          <div className="mt-5 flex gap-3 border-l-[3px] border-nhpc-red bg-nhpc-wash p-4">
-            <AlertTriangle className="mt-0.5 h-5 w-5 flex-none text-nhpc-red" aria-hidden="true" />
+          <div className="mt-5 border-l-[3px] border-nhpc-red bg-nhpc-wash p-4">
             <div className="space-y-1">
               <p className="leading-relaxed text-slate-800">{t(fraudWarning, lang)}</p>
               <p className="leading-relaxed text-slate-800">

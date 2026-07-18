@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, UserPlus, AlertTriangle, ArrowRight } from 'lucide-react';
+import { ShieldCheck, UserPlus, Flag, ArrowRight } from 'lucide-react';
 import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
-import { missionShort } from '@/content/site';
+import { missionShort, PORTAL_URL } from '@/content/site';
 import {
   heroHeading,
   heroKicker,
@@ -73,8 +73,8 @@ export default function HomeView({ lang }: { lang: Lang }) {
                 <UserPlus className="h-4 w-4 flex-none" aria-hidden="true" />
                 {lang === 'so' ? 'Is-diiwaangeli' : 'Register'}
               </CtaButton>
-              <CtaButton href={localizedHref('/public/complaints', lang)} variant="danger" onDark>
-                <AlertTriangle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
+              <CtaButton href={PORTAL_URL} variant="danger" onDark external>
+                <Flag className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
                 {lang === 'so' ? 'Soo Sheeg Xad-gudub' : 'Report Malpractice'}
               </CtaButton>
             </div>

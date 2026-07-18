@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ExternalLink, Search, Stethoscope, Building2, GraduationCap, AlertTriangle } from 'lucide-react';
+import { ExternalLink, Search, Stethoscope, Building2, GraduationCap } from 'lucide-react';
 import { isLang, localizedHref } from '@/lib/i18n';
 import type { Lang, NumberedItem } from '@/content/types';
 import { PORTAL_URL } from '@/content/site';
@@ -147,11 +147,7 @@ export default function VerifyPage({ params }: { params: { lang: string } }) {
         {/* Not registered → this is an offence, and what to do about it */}
         <section className="pt-10" aria-labelledby="not-registered-heading">
           <div className="border-l-[3px] border-nhpc-red bg-nhpc-wash p-5">
-            <h2
-              id="not-registered-heading"
-              className="flex items-center gap-2 text-lg font-bold text-nhpc-dark"
-            >
-              <AlertTriangle className="h-5 w-5 flex-none text-nhpc-red" aria-hidden="true" />
+            <h2 id="not-registered-heading" className="text-lg font-bold text-nhpc-dark">
               {so ? 'Haddii aysan diiwaangashaneyn' : 'If they are not registered'}
             </h2>
             <p className="mt-2 leading-relaxed text-slate-800">
@@ -166,12 +162,15 @@ export default function VerifyPage({ params }: { params: { lang: string } }) {
               >
                 {so ? 'Soo sheeg khiyaano' : 'Report fraud'}
               </Link>
-              <Link
-                href={localizedHref('/public/complaints', lang)}
-                className="inline-flex h-11 items-center rounded-md border border-nhpc-blue px-5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:bg-white"
+              <a
+                href={PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 items-center gap-1.5 rounded-md border border-nhpc-blue px-5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:bg-white"
               >
                 {so ? 'Gudbi cabasho' : 'File a complaint'}
-              </Link>
+                <ExternalLink className="h-4 w-4 flex-none" aria-hidden="true" />
+              </a>
             </div>
           </div>
         </section>

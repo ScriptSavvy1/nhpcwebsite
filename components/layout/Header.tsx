@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ShieldCheck, AlertTriangle, ChevronDown } from 'lucide-react';
+import { Menu, X, ShieldCheck, Flag, ChevronDown } from 'lucide-react';
 import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
 import { orgName, primaryNav, headerActions } from '@/content/site';
@@ -49,12 +49,11 @@ export default function Header({ lang }: { lang: Lang }) {
             priority
             className="h-10 w-10 flex-none"
           />
-          {/* Bilingual wordmark — shown at EVERY width. Compact on phones. */}
-          <span className="block min-w-0 leading-[1.15]">
-            <span className="block max-w-[26ch] text-[9px] font-bold uppercase tracking-tight text-nhpc-dark sm:max-w-[22ch] sm:text-[13px] lg:text-sm">
+          {/* Wordmark — English only. */}
+          <span className="block min-w-0 leading-tight">
+            <span className="block max-w-[26ch] text-[11px] font-bold uppercase tracking-tight text-nhpc-dark sm:max-w-[24ch] sm:text-sm lg:text-base">
               {orgName.en}
             </span>
-            <span className="block text-[9px] text-nhpc-grey sm:text-[11px]">{orgName.so}</span>
           </span>
         </Link>
 
@@ -96,17 +95,20 @@ export default function Header({ lang }: { lang: Lang }) {
             <span className="sr-only sm:hidden">{t(headerActions.verify.label, lang)}</span>
           </Link>
 
-          {/* Report Malpractice — outline RED only, never filled. */}
-          <Link
-            href={localizedHref(headerActions.reportMalpractice.href, lang)}
+          {/* Report Malpractice — outline RED only, never filled. Links out to
+              the portal, where the complaint form lives. */}
+          <a
+            href={headerActions.reportMalpractice.href}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex h-11 items-center justify-center gap-1.5 rounded-md border-2 border-nhpc-red px-3 text-sm font-semibold text-nhpc-dark transition-colors duration-150 hover:bg-nhpc-wash"
           >
-            <AlertTriangle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
+            <Flag className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
             <span className="hidden sm:inline">{t(headerActions.reportMalpractice.label, lang)}</span>
             <span className="sr-only sm:hidden">
               {t(headerActions.reportMalpractice.label, lang)}
             </span>
-          </Link>
+          </a>
 
           {/* Mobile menu toggle */}
           <button
@@ -187,17 +189,33 @@ export default function Header({ lang }: { lang: Lang }) {
                   </div>
                   {hasChildren && expanded && (
                     <ul className="pb-2 pl-3">
-                      {item.children!.map((child) => (
-                        <li key={child.href}>
-                          <Link
-                            href={localizedHref(child.href, lang)}
-                            onClick={() => setMobileOpen(false)}
-                            className="block border-l-2 border-nhpc-rule py-2 pl-3 text-sm text-nhpc-grey transition-colors duration-150 hover:border-nhpc-blue hover:text-nhpc-dark"
-                          >
-                            {t(child.label, lang)}
-                          </Link>
-                        </li>
-                      ))}
+                      {item.children!.map((child) => {
+                        const cls =
+                          'block border-l-2 border-nhpc-rule py-2 pl-3 text-sm text-nhpc-grey transition-colors duration-150 hover:border-nhpc-blue hover:text-nhpc-dark';
+                        return (
+                          <li key={child.href}>
+                            {child.external ? (
+                              <a
+                                href={child.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setMobileOpen(false)}
+                                className={cls}
+                              >
+                                {t(child.label, lang)}
+                              </a>
+                            ) : (
+                              <Link
+                                href={localizedHref(child.href, lang)}
+                                onClick={() => setMobileOpen(false)}
+                                className={cls}
+                              >
+                                {t(child.label, lang)}
+                              </Link>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </li>

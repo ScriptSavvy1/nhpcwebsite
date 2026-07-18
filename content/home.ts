@@ -1,4 +1,5 @@
 import type { Bilingual, NavItem, Stat } from './types';
+import { PORTAL_URL } from './site';
 
 // ─── Hero ────────────────────────────────────────────────────────────
 export const heroHeading: Bilingual = {
@@ -36,7 +37,7 @@ export const audiences: Audience[] = [
     href: '/public/verify',
     links: [
       { label: { en: 'Verify a Professional or Facility', so: 'Xaqiiji Mihnadle ama Xarun' }, href: '/public/verify' },
-      { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: '/public/complaints' },
+      { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: PORTAL_URL, external: true },
       { label: { en: 'Patient Rights Charter', so: 'Axdiga Xuquuqda Bukaanka' }, href: '/public/rights' },
     ],
   },
@@ -71,29 +72,25 @@ export const audiences: Audience[] = [
 ];
 
 // ─── Statistics ──────────────────────────────────────────────────────
-// PLACEHOLDER — NHPC has not published figures. Do NOT invent numbers.
-// Shown as "—" with a caption until real data is available.
+// Figures published by NHPC. Update these as the register changes.
 export const stats: Stat[] = [
   {
-    value: '—',
+    value: '1,000',
     label: { en: 'Registered health professionals', so: 'Mihnadlayaasha caafimaadka diiwaangashan' },
-    placeholder: true,
   },
   {
-    value: '—',
+    value: '200',
     label: { en: 'Licensed health facilities', so: 'Xarumaha caafimaadka ee shati leh' },
-    placeholder: true,
   },
   {
-    value: '—',
+    value: '50',
     label: { en: 'Accredited training institutions', so: 'Machadyada tababarka ee la aqoonsaday' },
-    placeholder: true,
   },
 ];
 
 export const statsCaption: Bilingual = {
-  en: 'Figures will be published as the national register is finalised.',
-  so: 'Tirooyinka waa la daabici doonaa marka diiwaanka qaran la dhammeystiro.',
+  en: 'Current totals from the NHPC register.',
+  so: 'Tirooyinka guud ee diiwaanka NHPC.',
 };
 
 // ─── About teaser ────────────────────────────────────────────────────

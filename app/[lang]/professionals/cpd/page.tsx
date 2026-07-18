@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, AlertTriangle } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { isLang, t, localizedHref } from '@/lib/i18n';
 import type { Lang, NumberedItem } from '@/content/types';
 import { cpdProviders } from '@/content/cpd';
@@ -200,8 +200,7 @@ export default function CpdPage({ params }: { params: { lang: string } }) {
             </>
           )}
 
-          <div className="mt-5 flex gap-3 border-l-[3px] border-nhpc-red bg-nhpc-wash p-4">
-            <AlertTriangle className="mt-0.5 h-5 w-5 flex-none text-nhpc-red" aria-hidden="true" />
+          <div className="mt-5 border-l-[3px] border-nhpc-red bg-nhpc-wash p-4">
             <p className="leading-relaxed text-slate-800">
               {so
                 ? 'Digniin: NHPC marnaba kuma codsado lacag ku bixi akoon shakhsi ah. Haddii qof kuu sheego inuu ka iibin karo dhibco CPD ah ama shahaado ku siin karo lacag, taasi waa khiyaano.'

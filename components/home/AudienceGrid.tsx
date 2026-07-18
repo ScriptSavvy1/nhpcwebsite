@@ -29,20 +29,32 @@ export default function AudienceGrid({ lang }: { lang: Lang }) {
             <p className="mt-1.5 text-sm leading-relaxed text-nhpc-grey">{t(a.blurb, lang)}</p>
 
             <ul className="mt-4 flex flex-col gap-px border-t border-nhpc-rule pt-4">
-              {a.links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={localizedHref(link.href, lang)}
-                    className="group flex items-center justify-between gap-2 rounded py-1.5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:text-nhpc-dark"
-                  >
+              {a.links.map((link) => {
+                const cls =
+                  'group flex items-center justify-between gap-2 rounded py-1.5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:text-nhpc-dark';
+                const inner = (
+                  <>
                     <span>{t(link.label, lang)}</span>
                     <ArrowRight
                       className="h-4 w-4 flex-none text-nhpc-tint transition-colors duration-150 group-hover:text-nhpc-blue"
                       aria-hidden="true"
                     />
-                  </Link>
-                </li>
-              ))}
+                  </>
+                );
+                return (
+                  <li key={link.href}>
+                    {link.external ? (
+                      <a href={link.href} target="_blank" rel="noopener noreferrer" className={cls}>
+                        {inner}
+                      </a>
+                    ) : (
+                      <Link href={localizedHref(link.href, lang)} className={cls}>
+                        {inner}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </section>
         );

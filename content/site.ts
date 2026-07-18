@@ -52,7 +52,9 @@ export const primaryNav: NavItem[] = [
     href: '/public/verify',
     children: [
       { label: { en: 'Verify a Professional or Facility', so: 'Xaqiiji Mihnadle ama Xarun' }, href: '/public/verify' },
-      { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: '/public/complaints' },
+      // Filing a complaint now happens on the NHPC portal (the portal team owns
+      // the complaint form). All "file a complaint" actions link out there.
+      { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: PORTAL_URL, external: true },
       { label: { en: 'How a Complaint is Handled', so: 'Sida Cabasho loo Maareeyo' }, href: '/public/complaints/process' },
       { label: { en: 'Patient Rights Charter', so: 'Axdiga Xuquuqda Bukaanka' }, href: '/public/rights' },
       { label: { en: 'Disciplinary Outcomes', so: 'Go’aannada Edbinta' }, href: '/public/disciplinary' },
@@ -104,13 +106,15 @@ export const headerActions = {
   },
   reportMalpractice: {
     label: { en: 'Report Malpractice', so: 'Soo Sheeg Xad-gudub' } satisfies Bilingual,
-    href: '/public/complaints',
+    // External: the complaint form lives on the portal.
+    href: PORTAL_URL,
+    external: true,
   },
 };
 
 export const footerQuickLinks: NavItem[] = [
   { label: { en: 'Verify', so: 'Xaqiiji' }, href: '/public/verify' },
-  { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: '/public/complaints' },
+  { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: PORTAL_URL, external: true },
   { label: { en: 'Register', so: 'Diiwaangelin' }, href: '/professionals/register' },
   { label: { en: 'NHPC Act Lr.31', so: 'Sharciga Lr.31' }, href: '/about/act' },
   { label: { en: 'Resources', so: 'Kheyraadka' }, href: '/resources' },

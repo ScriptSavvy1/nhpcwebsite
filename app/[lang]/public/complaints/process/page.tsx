@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { isLang, t, localizedHref } from '@/lib/i18n';
 import type { Lang } from '@/content/types';
 import { processTitle, processIntro, processStages, damagesNotice } from '@/content/complaints';
+import { PORTAL_URL } from '@/content/site';
 import PageHeader from '@/components/ui/PageHeader';
 import ActFooter from '@/components/ui/ActFooter';
 import SectionBand from '@/components/ui/SectionBand';
@@ -50,13 +51,15 @@ export default function ComplaintsProcessPage({ params }: { params: { lang: stri
             here originally, which is why this page's footer did not match
             the other three. */}
         <section className="pb-2">
-          <Link
-            href={localizedHref('/public/complaints', lang)}
+          <a
+            href={PORTAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:text-nhpc-dark"
           >
             {lang === 'so' ? 'Gudbi cabasho' : 'File a complaint'}
             <ArrowRight className="h-4 w-4 flex-none" aria-hidden="true" />
-          </Link>
+          </a>
         </section>
 
         <ActFooter

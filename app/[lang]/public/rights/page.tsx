@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import { isLang, localizedHref } from '@/lib/i18n';
 import type { Lang, NumberedItem } from '@/content/types';
+import { PORTAL_URL } from '@/content/site';
 import PageHeader from '@/components/ui/PageHeader';
 import SectionBand from '@/components/ui/SectionBand';
 import NumberedRows from '@/components/ui/NumberedRows';
@@ -130,13 +131,15 @@ export default function RightsPage({ params }: { params: { lang: string } }) {
                 : 'Have your rights been breached? File a complaint with us — it is free.'}
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
-              <Link
-                href={localizedHref('/public/complaints', lang)}
+              <a
+                href={PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-11 items-center gap-2 rounded-md bg-nhpc-blue px-5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-nhpc-dark"
               >
                 {so ? 'Gudbi cabasho' : 'File a complaint'}
-                <ArrowRight className="h-4 w-4 flex-none" aria-hidden="true" />
-              </Link>
+                <ExternalLink className="h-4 w-4 flex-none" aria-hidden="true" />
+              </a>
               <Link
                 href={localizedHref('/public/verify', lang)}
                 className="inline-flex h-11 items-center gap-2 rounded-md border border-nhpc-blue px-5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:bg-white"

@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { AlertTriangle, Globe, Mail, MessageCircle, Phone, ArrowRight } from 'lucide-react';
+import { Globe, Mail, MessageCircle, Phone, ArrowRight, ExternalLink } from 'lucide-react';
 import { isLang, localizedHref } from '@/lib/i18n';
 import type { Lang } from '@/content/types';
-import { contact, fraudWarning } from '@/content/site';
+import { contact, fraudWarning, PORTAL_URL } from '@/content/site';
 import PageHeader from '@/components/ui/PageHeader';
 import SectionBand from '@/components/ui/SectionBand';
 
@@ -68,11 +68,8 @@ export default function ReportFraudPage({ params }: { params: { lang: string } }
         {/* The fraud warning, both languages, always */}
         <section className="pt-10">
           <div className="border-l-[3px] border-nhpc-red bg-nhpc-wash p-4">
-            <p className="flex items-start gap-2 font-bold text-nhpc-dark">
-              <AlertTriangle className="mt-0.5 h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
-              {fraudWarning.en}
-            </p>
-            <p className="mt-1 pl-6 font-semibold text-nhpc-grey" lang="so">
+            <p className="font-bold text-nhpc-dark">{fraudWarning.en}</p>
+            <p className="mt-1 font-semibold text-nhpc-grey" lang="so">
               {fraudWarning.so}
             </p>
           </div>
@@ -144,13 +141,15 @@ export default function ReportFraudPage({ params }: { params: { lang: string } }
                 : 'Seen any of these? File a complaint with us, or call 2376.'}
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
-              <Link
-                href={localizedHref('/public/complaints', lang)}
+              <a
+                href={PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-11 items-center gap-2 rounded-md bg-nhpc-blue px-5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-nhpc-dark"
               >
                 {so ? 'Gudbi cabasho' : 'File a complaint'}
-                <ArrowRight className="h-4 w-4 flex-none" aria-hidden="true" />
-              </Link>
+                <ExternalLink className="h-4 w-4 flex-none" aria-hidden="true" />
+              </a>
               <a
                 href={`tel:${contact.complaintsLine}`}
                 className="inline-flex h-11 items-center gap-2 rounded-md border-2 border-nhpc-red px-5 text-sm font-semibold text-nhpc-dark transition-colors duration-150 hover:bg-white"

@@ -63,16 +63,23 @@ export default function Footer({ lang }: { lang: Lang }) {
             {lang === 'so' ? 'Xiriirinta Degdegga' : 'Quick Links'}
           </h2>
           <ul className="mt-4 space-y-2">
-            {footerQuickLinks.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={localizedHref(item.href, lang)}
-                  className="text-sm text-white/85 transition-colors duration-150 hover:text-white hover:underline"
-                >
-                  {t(item.label, lang)}
-                </Link>
-              </li>
-            ))}
+            {footerQuickLinks.map((item) => {
+              const cls =
+                'text-sm text-white/85 transition-colors duration-150 hover:text-white hover:underline';
+              return (
+                <li key={item.href}>
+                  {item.external ? (
+                    <a href={item.href} target="_blank" rel="noopener noreferrer" className={cls}>
+                      {t(item.label, lang)}
+                    </a>
+                  ) : (
+                    <Link href={localizedHref(item.href, lang)} className={cls}>
+                      {t(item.label, lang)}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
