@@ -50,7 +50,7 @@ export default function HomeView({ lang }: { lang: Lang }) {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <CtaButton href={VERIFY_URL} variant="primary" external>
                 <ShieldCheck className="h-4 w-4 flex-none" aria-hidden="true" />
-                {lang === 'so' ? 'Xaqiiji Mihnadle' : 'Verify a Professional'}
+                {lang === 'so' ? 'Xaqiiji' : 'Verify'}
               </CtaButton>
               <CtaButton href={REGISTER_URL} variant="outline" external>
                 <UserPlus className="h-4 w-4 flex-none" aria-hidden="true" />
@@ -58,7 +58,7 @@ export default function HomeView({ lang }: { lang: Lang }) {
               </CtaButton>
               <CtaButton href={COMPLAINT_URL} variant="danger" external>
                 <Flag className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
-                {lang === 'so' ? 'Soo Sheeg Xad-gudub' : 'Report Malpractice'}
+                {lang === 'so' ? 'Gudbi Cabasho' : 'File a Complaint'}
               </CtaButton>
             </div>
           </div>

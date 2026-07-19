@@ -16,9 +16,8 @@ const nextConfig = {
 
   // NOTE: there is deliberately no redirects() block. redirects() is a
   // server feature and is silently dropped by output:'export' — / → /en is
-  // handled by public/index.html instead. If we ever return to a Node host,
-  // restore redirects() and delete public/index.html; the two would fight,
-  // since redirects are evaluated before the filesystem.
+  // handled by public/.htaccess (Apache/cPanel) instead. If we ever return to
+  // a Node host, restore redirects() and remove the .htaccess rule.
 };
 
 export default nextConfig;

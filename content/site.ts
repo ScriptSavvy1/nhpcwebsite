@@ -34,9 +34,8 @@ export const contact = {
   } satisfies Bilingual,
 };
 
-// Complaints & malpractice reports go to WhatsApp for now; a downloadable
-// complaint form (fill in and email) will follow.
-export const COMPLAINT_URL = `https://wa.me/${contact.whatsapp.replace(/\D/g, '')}`;
+// Complaints are filed on the portal complaint page.
+export const COMPLAINT_URL = `${PORTAL_URL}/complaints`;
 
 // The fraud warning must appear in BOTH languages at once, always.
 export const fraudWarning = {
@@ -112,8 +111,7 @@ export const headerActions = {
     external: true,
   },
   reportMalpractice: {
-    label: { en: 'Report Malpractice', so: 'Soo Sheeg Xad-gudub' } satisfies Bilingual,
-    // Complaints/malpractice reports go to WhatsApp for now.
+    label: { en: 'File a Complaint', so: 'Gudbi Cabasho' } satisfies Bilingual,
     href: COMPLAINT_URL,
     external: true,
   },

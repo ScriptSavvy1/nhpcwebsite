@@ -77,25 +77,29 @@ export const audiences: Audience[] = [
 ];
 
 // ─── Statistics ──────────────────────────────────────────────────────
-// Figures published by NHPC. Update these as the register changes.
+// PLACEHOLDER — real figures not available yet. Shown as "—" until the
+// Council publishes the register totals. Do NOT invent numbers.
 export const stats: Stat[] = [
   {
-    value: '1,000',
+    value: '—',
     label: { en: 'Registered health professionals', so: 'Mihnadlayaasha caafimaadka diiwaangashan' },
+    placeholder: true,
   },
   {
-    value: '200',
+    value: '—',
     label: { en: 'Licensed health facilities', so: 'Xarumaha caafimaadka ee shati leh' },
+    placeholder: true,
   },
   {
-    value: '50',
+    value: '—',
     label: { en: 'Accredited training institutions', so: 'Machadyada tababarka ee la aqoonsaday' },
+    placeholder: true,
   },
 ];
 
 export const statsCaption: Bilingual = {
-  en: 'Current totals from the NHPC register.',
-  so: 'Tirooyinka guud ee diiwaanka NHPC.',
+  en: 'Figures will be updated once the register totals are available.',
+  so: 'Tirooyinka waa la cusbooneysiin doonaa marka la helo xogta diiwaanka.',
 };
 
 // ─── About teaser ────────────────────────────────────────────────────
