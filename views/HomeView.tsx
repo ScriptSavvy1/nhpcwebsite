@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { ShieldCheck, UserPlus, MessageCircle, ArrowRight } from 'lucide-react';
+import { ShieldCheck, UserPlus, AlertTriangle, QrCode, ArrowRight } from 'lucide-react';
 import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
-import { missionShort, VERIFY_URL, REGISTER_URL, COMPLAINT_URL } from '@/content/site';
+import { VERIFY_URL, REGISTER_URL, COMPLAINT_URL } from '@/content/site';
 import {
   heroHeading,
   heroKicker,
+  heroBody,
   stats,
   statsCaption,
   aboutTeaser,
@@ -21,58 +21,101 @@ import AudienceGrid from '@/components/home/AudienceGrid';
 export default function HomeView({ lang }: { lang: Lang }) {
   const notices = latestNotices(5);
 
+  // Two-tier headline: the active language leads, the other sits beneath.
+  const primaryHeading = lang === 'so' ? heroHeading.so : heroHeading.en;
+  const secondaryHeading = lang === 'so' ? heroHeading.en : heroHeading.so;
+
   return (
     <>
-      {/* Hero — a SUBTLE single-hue deepening (nhpc-blue #0055AA at top-left to
-          nhpc-dark #003D7A at bottom-right), dot texture on top, and the
-          Federal Republic of Somalia coat of arms as a faint watermark bleeding
-          off the right (it signals state authority under Act Lr.31). One mark
-          only — the NHPC seal stays in the header. */}
-      <section className="relative overflow-hidden text-white [background:linear-gradient(135deg,#0055AA_0%,#003D7A_100%)]">
-        {/* Dot-grid texture, on top of the deepening. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1.5px)] [background-size:22px_22px]"
-        />
-        {/* Coat of arms watermark — right, bleeding off the edge, faint. Full
-            colour: at low opacity over the blue it reads as a tonal, blue-
-            tinted emblem. Hidden below lg so it never crowds the text on
-            phones. Placeholder asset (public-domain emblem); swap in the final
-            file at the same path. */}
-        <Image
-          src="/somalia-coat-of-arms.svg"
-          alt=""
-          aria-hidden="true"
-          width={1240}
-          height={1000}
-          className="pointer-events-none absolute right-0 top-1/2 hidden h-[520px] w-auto -translate-y-1/2 translate-x-[28%] select-none opacity-[0.14] lg:block"
-        />
-
-        <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 md:py-28">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+      {/* Hero — light. Left: text + CTAs. Right (lg+ only): an illustration of
+          an NHPC health-professional licence. The card drops entirely below lg
+          so it never shrinks onto a phone. */}
+      <section className="border-b border-nhpc-rule bg-white">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:py-20 lg:grid-cols-2 lg:items-center lg:gap-12">
+          {/* Left — text */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-nhpc-blue">
               {t(heroKicker, lang)}
             </p>
-            <h1 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl lg:text-6xl">
-              {t(heroHeading, lang)}
+            <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-nhpc-dark md:text-5xl">
+              {primaryHeading}
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 md:text-lg">
-              {t(missionShort, lang)}
+            <p className="mt-2 text-2xl font-semibold leading-tight text-nhpc-blue md:text-3xl">
+              {secondaryHeading}
+            </p>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-nhpc-grey md:text-lg">
+              {t(heroBody, lang)}
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <CtaButton href={VERIFY_URL} variant="primary" onDark external>
-                <ShieldCheck className="h-4 w-4 flex-none" aria-hidden="true" />
-                {lang === 'so' ? 'Xaqiiji Mihnadle' : 'Verify a Professional'}
-              </CtaButton>
-              <CtaButton href={REGISTER_URL} variant="outline" onDark external>
-                <UserPlus className="h-4 w-4 flex-none" aria-hidden="true" />
-                {lang === 'so' ? 'Is-diiwaangeli' : 'Register'}
-              </CtaButton>
-              <CtaButton href={COMPLAINT_URL} variant="danger" onDark external>
-                <MessageCircle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
-                {lang === 'so' ? 'Soo Sheeg Xad-gudub' : 'Report Malpractice'}
-              </CtaButton>
+            <div className="mt-8 flex flex-col gap-3">
+              <div className="flex flex-wrap gap-3">
+                <CtaButton href={VERIFY_URL} variant="primary" external>
+                  <ShieldCheck className="h-4 w-4 flex-none" aria-hidden="true" />
+                  {lang === 'so' ? 'Xaqiiji Mihnadle' : 'Verify a Professional'}
+                </CtaButton>
+                <CtaButton href={REGISTER_URL} variant="outline" external>
+                  <UserPlus className="h-4 w-4 flex-none" aria-hidden="true" />
+                  {lang === 'so' ? 'Is-diiwaangeli' : 'Register'}
+                </CtaButton>
+              </div>
+              <div>
+                <CtaButton href={COMPLAINT_URL} variant="danger" external>
+                  <AlertTriangle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
+                  {lang === 'so' ? 'Soo Sheeg Xad-gudub' : 'Report Malpractice'}
+                </CtaButton>
+              </div>
+            </div>
+          </div>
+
+          {/* Right — licence card illustration (lg+ only, NOT interactive) */}
+          <div className="relative hidden lg:block">
+            {/* light-blue backing panel */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 translate-x-4 translate-y-4 rounded-2xl bg-nhpc-wash"
+            />
+            <div className="relative rounded-2xl border border-nhpc-rule bg-white p-7">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-nhpc-blue">
+                  NHPC · Health Professional Licence
+                </p>
+                <span className="inline-flex flex-none items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                  Licence active
+                </span>
+              </div>
+
+              <div className="mt-5 border-t border-nhpc-rule pt-5">
+                <p className="text-lg font-bold text-nhpc-dark">[ Full name of professional ]</p>
+                <p className="mt-0.5 text-sm text-nhpc-grey">General Doctor</p>
+              </div>
+
+              <dl className="mt-5 grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-nhpc-grey">
+                    Registration no.
+                  </dt>
+                  <dd className="mt-0.5 font-mono text-sm font-semibold text-nhpc-dark">
+                    NHPC-2026-100001
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-nhpc-grey">
+                    Valid to
+                  </dt>
+                  <dd className="mt-0.5 font-mono text-sm font-semibold text-nhpc-dark">
+                    31 Dec 2027
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="mt-5 flex items-center gap-3 border-t border-nhpc-rule pt-5">
+                <QrCode className="h-14 w-14 flex-none text-nhpc-dark" aria-hidden="true" />
+                <p className="text-xs leading-relaxed text-nhpc-grey">
+                  Scan to verify at{' '}
+                  <span className="font-semibold text-nhpc-dark">nhpc.gov.so/verify</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>

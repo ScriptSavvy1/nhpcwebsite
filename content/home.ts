@@ -4,12 +4,17 @@ import { COMPLAINT_URL } from './site';
 // ─── Hero ────────────────────────────────────────────────────────────
 export const heroHeading: Bilingual = {
   en: 'Safeguarding health care for all Somalis',
-  so: 'Ilaalinta daryeelka caafimaadka dhammaan Soomaalida',
+  so: 'Hufnaanta daryeelka caafimaad ee Soomaaliya',
 };
 
 export const heroKicker: Bilingual = {
   en: 'Independent statutory regulator · Act Lr.31',
   so: 'Hay’ad sharci oo madax-bannaan · Sharciga Lr.31',
+};
+
+export const heroBody: Bilingual = {
+  en: 'Confirm any health professional or facility is registered and licensed under Act Lr.31.',
+  so: 'Xaqiiji in mihnadle caafimaad ama xarun ay diiwaangashan tahay oo shati leedahay sida uu dhigayo Sharciga Lr.31.',
 };
 
 // ─── Audience doors ──────────────────────────────────────────────────

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ShieldCheck, MessageCircle, ChevronDown } from 'lucide-react';
+import { Menu, X, ShieldCheck, AlertTriangle, ChevronDown } from 'lucide-react';
 import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
 import { orgName, primaryNav, headerActions } from '@/content/site';
@@ -106,7 +106,7 @@ export default function Header({ lang }: { lang: Lang }) {
             rel="noopener noreferrer"
             className="inline-flex h-11 items-center justify-center gap-1.5 rounded-md border-2 border-nhpc-red px-3 text-sm font-semibold text-nhpc-dark transition-colors duration-150 hover:bg-nhpc-wash"
           >
-            <MessageCircle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
+            <AlertTriangle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
             <span className="hidden sm:inline">{t(headerActions.reportMalpractice.label, lang)}</span>
             <span className="sr-only sm:hidden">
               {t(headerActions.reportMalpractice.label, lang)}
