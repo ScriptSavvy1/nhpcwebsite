@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -28,8 +28,19 @@ export default function Header({ lang }: { lang: Lang }) {
   const active = firstSegment(pathname);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
-  // Which desktop dropdown is open (by top-level href), if any.
+  // Which desktop dropdown is open (by top-level href), if any. A short close
+  // delay lets the cursor travel from the trigger into the panel without it
+  // snapping shut.
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openMenuNow = (href: string) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpenMenu(href);
+  };
+  const scheduleClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpenMenu(null), 180);
+  };
 
   const isActive = (href: string) =>
     href === '/' ? active === '' : sectionsFor(href).includes(active);
@@ -98,8 +109,8 @@ export default function Header({ lang }: { lang: Lang }) {
                 <li
                   key={item.href}
                   className="relative"
-                  onMouseEnter={() => setOpenMenu(item.href)}
-                  onMouseLeave={() => setOpenMenu(null)}
+                  onMouseEnter={() => openMenuNow(item.href)}
+                  onMouseLeave={scheduleClose}
                   onBlur={(e) => {
                     if (!e.currentTarget.contains(e.relatedTarget as Node)) setOpenMenu(null);
                   }}
@@ -112,7 +123,7 @@ export default function Header({ lang }: { lang: Lang }) {
                     aria-current={itemActive ? 'page' : undefined}
                     aria-haspopup="true"
                     aria-expanded={open}
-                    onFocus={() => setOpenMenu(item.href)}
+                    onFocus={() => openMenuNow(item.href)}
                     className={navLinkClass(itemActive)}
                   >
                     {t(item.label, lang)}
@@ -126,7 +137,7 @@ export default function Header({ lang }: { lang: Lang }) {
                   </Link>
 
                   {open && (
-                    <ul className="absolute left-0 top-full z-50 mt-1 min-w-[248px] rounded-lg border border-nhpc-rule bg-white py-2">
+                    <ul className="absolute left-0 top-full z-50 min-w-[248px] rounded-b-lg border border-t-0 border-nhpc-rule bg-white py-2">
                       {item.children!.map((child) => {
                         const cls =
                           'block px-4 py-2 text-sm text-nhpc-grey transition-colors duration-150 hover:bg-nhpc-wash hover:text-nhpc-dark';
