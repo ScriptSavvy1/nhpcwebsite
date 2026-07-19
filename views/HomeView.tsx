@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ShieldCheck, UserPlus, AlertTriangle, QrCode, ArrowRight } from 'lucide-react';
+import { ShieldCheck, UserPlus, Flag, QrCode, ArrowRight } from 'lucide-react';
 import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
 import { VERIFY_URL, REGISTER_URL, COMPLAINT_URL } from '@/content/site';
@@ -47,23 +47,19 @@ export default function HomeView({ lang }: { lang: Lang }) {
               {t(heroBody, lang)}
             </p>
 
-            <div className="mt-8 flex flex-col gap-3">
-              <div className="flex flex-wrap gap-3">
-                <CtaButton href={VERIFY_URL} variant="primary" external>
-                  <ShieldCheck className="h-4 w-4 flex-none" aria-hidden="true" />
-                  {lang === 'so' ? 'Xaqiiji Mihnadle' : 'Verify a Professional'}
-                </CtaButton>
-                <CtaButton href={REGISTER_URL} variant="outline" external>
-                  <UserPlus className="h-4 w-4 flex-none" aria-hidden="true" />
-                  {lang === 'so' ? 'Is-diiwaangeli' : 'Register'}
-                </CtaButton>
-              </div>
-              <div>
-                <CtaButton href={COMPLAINT_URL} variant="danger" external>
-                  <AlertTriangle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
-                  {lang === 'so' ? 'Soo Sheeg Xad-gudub' : 'Report Malpractice'}
-                </CtaButton>
-              </div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <CtaButton href={VERIFY_URL} variant="primary" external>
+                <ShieldCheck className="h-4 w-4 flex-none" aria-hidden="true" />
+                {lang === 'so' ? 'Xaqiiji Mihnadle' : 'Verify a Professional'}
+              </CtaButton>
+              <CtaButton href={REGISTER_URL} variant="outline" external>
+                <UserPlus className="h-4 w-4 flex-none" aria-hidden="true" />
+                {lang === 'so' ? 'Is-diiwaangeli' : 'Register'}
+              </CtaButton>
+              <CtaButton href={COMPLAINT_URL} variant="danger" external>
+                <Flag className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
+                {lang === 'so' ? 'Soo Sheeg Xad-gudub' : 'Report Malpractice'}
+              </CtaButton>
             </div>
           </div>
 
