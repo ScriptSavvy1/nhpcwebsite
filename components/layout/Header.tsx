@@ -28,9 +28,19 @@ export default function Header({ lang }: { lang: Lang }) {
   const active = firstSegment(pathname);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
+  // Which desktop dropdown is open (by top-level href), if any.
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const isActive = (href: string) =>
     href === '/' ? active === '' : sectionsFor(href).includes(active);
+
+  const navLinkClass = (activeItem: boolean) =>
+    [
+      'inline-flex items-center gap-1 border-b-2 px-3 py-1.5 text-sm font-semibold transition-colors duration-150',
+      activeItem
+        ? 'border-nhpc-red text-nhpc-dark'
+        : 'border-transparent text-nhpc-grey hover:text-nhpc-dark',
+    ].join(' ');
 
   return (
     <header className="sticky top-0 z-40 border-b border-nhpc-rule bg-white">
@@ -57,26 +67,99 @@ export default function Header({ lang }: { lang: Lang }) {
           </span>
         </Link>
 
-        {/* Desktop primary nav */}
+        {/* Desktop primary nav — top-level items link to their landing page;
+            items with children reveal a dropdown on hover and on keyboard
+            focus (Esc / focus-out closes). */}
         <nav
-          className="hidden flex-1 items-center justify-center gap-1 lg:flex"
+          className="hidden flex-1 items-center justify-center lg:flex"
           aria-label={lang === 'so' ? 'Nave weyn' : 'Primary'}
         >
-          {primaryNav.map((item) => (
-            <Link
-              key={item.href}
-              href={localizedHref(item.href, lang)}
-              aria-current={isActive(item.href) ? 'page' : undefined}
-              className={[
-                'border-b-2 px-3 py-1.5 text-sm font-semibold transition-colors duration-150',
-                isActive(item.href)
-                  ? 'border-nhpc-red text-nhpc-dark'
-                  : 'border-transparent text-nhpc-grey hover:text-nhpc-dark',
-              ].join(' ')}
-            >
-              {t(item.label, lang)}
-            </Link>
-          ))}
+          <ul className="flex items-center gap-1">
+            {primaryNav.map((item) => {
+              const itemActive = isActive(item.href);
+              const hasChildren = !!item.children?.length;
+
+              if (!hasChildren) {
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={localizedHref(item.href, lang)}
+                      aria-current={itemActive ? 'page' : undefined}
+                      className={navLinkClass(itemActive)}
+                    >
+                      {t(item.label, lang)}
+                    </Link>
+                  </li>
+                );
+              }
+
+              const open = openMenu === item.href;
+              return (
+                <li
+                  key={item.href}
+                  className="relative"
+                  onMouseEnter={() => setOpenMenu(item.href)}
+                  onMouseLeave={() => setOpenMenu(null)}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) setOpenMenu(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setOpenMenu(null);
+                  }}
+                >
+                  <Link
+                    href={localizedHref(item.href, lang)}
+                    aria-current={itemActive ? 'page' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open}
+                    onFocus={() => setOpenMenu(item.href)}
+                    className={navLinkClass(itemActive)}
+                  >
+                    {t(item.label, lang)}
+                    <ChevronDown
+                      className={[
+                        'h-4 w-4 transition-transform duration-150',
+                        open ? 'rotate-180' : '',
+                      ].join(' ')}
+                      aria-hidden="true"
+                    />
+                  </Link>
+
+                  {open && (
+                    <ul className="absolute left-0 top-full z-50 mt-1 min-w-[248px] rounded-lg border border-nhpc-rule bg-white py-2">
+                      {item.children!.map((child) => {
+                        const cls =
+                          'block px-4 py-2 text-sm text-nhpc-grey transition-colors duration-150 hover:bg-nhpc-wash hover:text-nhpc-dark';
+                        return (
+                          <li key={child.href}>
+                            {child.external ? (
+                              <a
+                                href={child.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={cls}
+                                onClick={() => setOpenMenu(null)}
+                              >
+                                {t(child.label, lang)}
+                              </a>
+                            ) : (
+                              <Link
+                                href={localizedHref(child.href, lang)}
+                                className={cls}
+                                onClick={() => setOpenMenu(null)}
+                              >
+                                {t(child.label, lang)}
+                              </Link>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </nav>
 
         {/* Right actions */}
