@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, UserPlus, Flag, ArrowRight } from 'lucide-react';
+import { ShieldCheck, UserPlus, MessageCircle, ArrowRight } from 'lucide-react';
 import type { Lang } from '@/content/types';
 import { t, localizedHref } from '@/lib/i18n';
-import { missionShort, PORTAL_URL } from '@/content/site';
+import { missionShort, VERIFY_URL, REGISTER_URL, COMPLAINT_URL } from '@/content/site';
 import {
   heroHeading,
   heroKicker,
@@ -61,20 +61,16 @@ export default function HomeView({ lang }: { lang: Lang }) {
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <CtaButton href={localizedHref('/public/verify', lang)} variant="primary" onDark>
+              <CtaButton href={VERIFY_URL} variant="primary" onDark external>
                 <ShieldCheck className="h-4 w-4 flex-none" aria-hidden="true" />
                 {lang === 'so' ? 'Xaqiiji Mihnadle' : 'Verify a Professional'}
               </CtaButton>
-              <CtaButton
-                href={localizedHref('/professionals/register', lang)}
-                variant="outline"
-                onDark
-              >
+              <CtaButton href={REGISTER_URL} variant="outline" onDark external>
                 <UserPlus className="h-4 w-4 flex-none" aria-hidden="true" />
                 {lang === 'so' ? 'Is-diiwaangeli' : 'Register'}
               </CtaButton>
-              <CtaButton href={PORTAL_URL} variant="danger" onDark external>
-                <Flag className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
+              <CtaButton href={COMPLAINT_URL} variant="danger" onDark external>
+                <MessageCircle className="h-4 w-4 flex-none text-nhpc-red" aria-hidden="true" />
                 {lang === 'so' ? 'Soo Sheeg Xad-gudub' : 'Report Malpractice'}
               </CtaButton>
             </div>
@@ -89,6 +85,34 @@ export default function HomeView({ lang }: { lang: Lang }) {
             {lang === 'so' ? 'Dooro dariiqaaga' : 'Choose your path'}
           </h2>
           <AudienceGrid lang={lang} />
+        </section>
+
+        {/* Internship → licence promo */}
+        <section className="pb-12" aria-labelledby="internship-heading">
+          <div className="flex flex-col gap-4 rounded-lg border border-l-4 border-nhpc-rule border-l-nhpc-blue bg-white p-6 md:flex-row md:items-center md:justify-between md:gap-8 md:p-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-wide text-nhpc-blue">
+                {lang === 'so' ? 'Tababarka → Shatiga' : 'Internship → Licence'}
+              </p>
+              <h2
+                id="internship-heading"
+                className="mt-1 text-xl font-bold tracking-tight text-nhpc-dark"
+              >
+                {lang === 'so' ? 'U beddel tababarkaaga shati' : 'Turn your internship into a licence'}
+              </h2>
+              <p className="mt-2 leading-relaxed text-nhpc-grey">
+                {lang === 'so'
+                  ? 'Qalin-jabiyeyaasha cusub waxay dhammaystiraan tababar la kormeeray, kadibna waxay si toos ah u gudbaan diiwaangelinta buuxda.'
+                  : 'New graduates complete a supervised internship and move straight into full registration.'}
+              </p>
+            </div>
+            <div className="flex-none">
+              <CtaButton href={REGISTER_URL} variant="primary" external>
+                <UserPlus className="h-4 w-4 flex-none" aria-hidden="true" />
+                {lang === 'so' ? 'Is-diiwaangeli' : 'Register'}
+              </CtaButton>
+            </div>
+          </div>
         </section>
 
         {/* Statistics */}

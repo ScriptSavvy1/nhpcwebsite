@@ -1,5 +1,5 @@
 import type { Bilingual, NavItem, Stat } from './types';
-import { PORTAL_URL } from './site';
+import { COMPLAINT_URL } from './site';
 
 // ─── Hero ────────────────────────────────────────────────────────────
 export const heroHeading: Bilingual = {
@@ -37,7 +37,7 @@ export const audiences: Audience[] = [
     href: '/public/verify',
     links: [
       { label: { en: 'Verify a Professional or Facility', so: 'Xaqiiji Mihnadle ama Xarun' }, href: '/public/verify' },
-      { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: PORTAL_URL, external: true },
+      { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: COMPLAINT_URL, external: true },
       { label: { en: 'Patient Rights Charter', so: 'Axdiga Xuquuqda Bukaanka' }, href: '/public/rights' },
     ],
   },

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Mail, MessageCircle, Phone, Clock, MapPin, ArrowRight, ExternalLink } from 'lucide-react';
 import { isLang, t, localizedHref } from '@/lib/i18n';
 import type { Lang } from '@/content/types';
-import { contact, fraudWarning, PORTAL_URL } from '@/content/site';
+import { contact, fraudWarning, COMPLAINT_URL } from '@/content/site';
 import PageHeader from '@/components/ui/PageHeader';
 import SectionBand from '@/components/ui/SectionBand';
 
@@ -132,7 +132,7 @@ export default function ContactPage({ params }: { params: { lang: string } }) {
           <ul className="mt-5 space-y-3">
             <li>
               <a
-                href={PORTAL_URL}
+                href={COMPLAINT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-start justify-between gap-3 rounded-lg border border-l-[3px] border-nhpc-rule border-l-nhpc-blue p-4 transition-colors duration-150 hover:border-nhpc-blue"

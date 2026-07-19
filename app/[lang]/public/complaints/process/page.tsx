@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { isLang, t, localizedHref } from '@/lib/i18n';
 import type { Lang } from '@/content/types';
 import { processTitle, processIntro, processStages, damagesNotice } from '@/content/complaints';
-import { PORTAL_URL } from '@/content/site';
+import { COMPLAINT_URL } from '@/content/site';
 import PageHeader from '@/components/ui/PageHeader';
 import ActFooter from '@/components/ui/ActFooter';
 import SectionBand from '@/components/ui/SectionBand';
@@ -52,7 +52,7 @@ export default function ComplaintsProcessPage({ params }: { params: { lang: stri
             the other three. */}
         <section className="pb-2">
           <a
-            href={PORTAL_URL}
+            href={COMPLAINT_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:text-nhpc-dark"

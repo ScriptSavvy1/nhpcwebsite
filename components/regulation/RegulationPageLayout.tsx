@@ -1,7 +1,7 @@
 import { Check, ExternalLink, Scale } from 'lucide-react';
 import type { Lang, RegulationContent } from '@/content/types';
 import { t } from '@/lib/i18n';
-import { PORTAL_URL } from '@/content/site';
+import { REGISTER_URL } from '@/content/site';
 import { documentById } from '@/content/documents';
 import SectionBand from '@/components/ui/SectionBand';
 import NumberedRows from '@/components/ui/NumberedRows';
@@ -50,7 +50,7 @@ export default function RegulationPageLayout({
           <p className="mt-3 max-w-2xl leading-relaxed text-slate-800">{t(content.intro, lang)}</p>
           {hasApplication && (
             <div className="mt-6">
-              <CtaButton href={PORTAL_URL} variant="primary" external>
+              <CtaButton href={REGISTER_URL} variant="primary" external>
                 {applyLabel}
                 <ExternalLink className="h-4 w-4 flex-none" aria-hidden="true" />
                 <span className="sr-only">
@@ -317,7 +317,7 @@ export default function RegulationPageLayout({
               </p>
             )}
             <div className="mt-5 flex justify-center">
-              <CtaButton href={PORTAL_URL} variant="primary" external>
+              <CtaButton href={REGISTER_URL} variant="primary" external>
                 {applyLabel}
                 <ExternalLink className="h-4 w-4 flex-none" aria-hidden="true" />
                 <span className="sr-only">

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { isLang, localizedHref } from '@/lib/i18n';
 import type { Lang, NumberedItem } from '@/content/types';
-import { PORTAL_URL } from '@/content/site';
+import { COMPLAINT_URL } from '@/content/site';
 import PageHeader from '@/components/ui/PageHeader';
 import SectionBand from '@/components/ui/SectionBand';
 import NumberedRows from '@/components/ui/NumberedRows';
@@ -132,7 +132,7 @@ export default function RightsPage({ params }: { params: { lang: string } }) {
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
               <a
-                href={PORTAL_URL}
+                href={COMPLAINT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-11 items-center gap-2 rounded-md bg-nhpc-blue px-5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-nhpc-dark"

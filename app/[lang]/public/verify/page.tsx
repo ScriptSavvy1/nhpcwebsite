@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ExternalLink, Search, Stethoscope, Building2, GraduationCap } from 'lucide-react';
 import { isLang, localizedHref } from '@/lib/i18n';
 import type { Lang, NumberedItem } from '@/content/types';
-import { PORTAL_URL } from '@/content/site';
+import { VERIFY_URL, COMPLAINT_URL } from '@/content/site';
 import PageHeader from '@/components/ui/PageHeader';
 import ActFooter from '@/components/ui/ActFooter';
 import SectionBand from '@/components/ui/SectionBand';
@@ -107,7 +107,7 @@ export default function VerifyPage({ params }: { params: { lang: string } }) {
         }
       >
         <div className="mt-6">
-          <CtaButton href={PORTAL_URL} variant="primary" external>
+          <CtaButton href={VERIFY_URL} variant="primary" external>
             <Search className="h-4 w-4 flex-none" aria-hidden="true" />
             {so ? 'Ka raadi diiwaanka' : 'Search the register'}
             <ExternalLink className="h-4 w-4 flex-none" aria-hidden="true" />
@@ -163,7 +163,7 @@ export default function VerifyPage({ params }: { params: { lang: string } }) {
                 {so ? 'Soo sheeg khiyaano' : 'Report fraud'}
               </Link>
               <a
-                href={PORTAL_URL}
+                href={COMPLAINT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-11 items-center gap-1.5 rounded-md border border-nhpc-blue px-5 text-sm font-semibold text-nhpc-blue transition-colors duration-150 hover:bg-white"

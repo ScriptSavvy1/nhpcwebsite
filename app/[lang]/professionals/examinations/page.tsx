@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ExternalLink, ArrowRight, Users } from 'lucide-react';
 import { isLang, t, localizedHref } from '@/lib/i18n';
 import type { Lang, NumberedItem } from '@/content/types';
-import { PORTAL_URL } from '@/content/site';
+import { REGISTER_URL } from '@/content/site';
 import { sittings } from '@/content/examinations';
 import PageHeader from '@/components/ui/PageHeader';
 import ActFooter from '@/components/ui/ActFooter';
@@ -89,7 +89,7 @@ export default function ExaminationsPage({ params }: { params: { lang: string } 
         }
       >
         <div className="mt-6">
-          <CtaButton href={PORTAL_URL} variant="primary" external>
+          <CtaButton href={REGISTER_URL} variant="primary" external>
             {so ? 'Isu diiwaangeli imtixaan' : 'Register for an examination'}
             <ExternalLink className="h-4 w-4 flex-none" aria-hidden="true" />
             <span className="sr-only">{so ? '(wuxuu ku furmayaa tab cusub)' : '(opens in new tab)'}</span>

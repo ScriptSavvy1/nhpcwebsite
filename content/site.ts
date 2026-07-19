@@ -1,6 +1,8 @@
 import type { Bilingual, NavItem } from './types';
 
 export const PORTAL_URL = 'https://ehr.so';
+export const VERIFY_URL = `${PORTAL_URL}/verify`;
+export const REGISTER_URL = `${PORTAL_URL}/app/sign-in`;
 
 export const orgName: Bilingual = {
   en: 'National Health Professionals Council',
@@ -32,6 +34,10 @@ export const contact = {
   } satisfies Bilingual,
 };
 
+// Complaints & malpractice reports go to WhatsApp for now; a downloadable
+// complaint form (fill in and email) will follow.
+export const COMPLAINT_URL = `https://wa.me/${contact.whatsapp.replace(/\D/g, '')}`;
+
 // The fraud warning must appear in BOTH languages at once, always.
 export const fraudWarning = {
   en: 'NHPC never requests payment via personal accounts.',
@@ -54,7 +60,7 @@ export const primaryNav: NavItem[] = [
       { label: { en: 'Verify a Professional or Facility', so: 'Xaqiiji Mihnadle ama Xarun' }, href: '/public/verify' },
       // Filing a complaint now happens on the NHPC portal (the portal team owns
       // the complaint form). All "file a complaint" actions link out there.
-      { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: PORTAL_URL, external: true },
+      { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: COMPLAINT_URL, external: true },
       { label: { en: 'How a Complaint is Handled', so: 'Sida Cabasho loo Maareeyo' }, href: '/public/complaints/process' },
       { label: { en: 'Patient Rights Charter', so: 'Axdiga Xuquuqda Bukaanka' }, href: '/public/rights' },
       { label: { en: 'Disciplinary Outcomes', so: 'Go’aannada Edbinta' }, href: '/public/disciplinary' },
@@ -102,20 +108,21 @@ export const primaryNav: NavItem[] = [
 export const headerActions = {
   verify: {
     label: { en: 'Verify', so: 'Xaqiiji' } satisfies Bilingual,
-    href: '/public/verify',
+    href: VERIFY_URL,
+    external: true,
   },
   reportMalpractice: {
     label: { en: 'Report Malpractice', so: 'Soo Sheeg Xad-gudub' } satisfies Bilingual,
-    // External: the complaint form lives on the portal.
-    href: PORTAL_URL,
+    // Complaints/malpractice reports go to WhatsApp for now.
+    href: COMPLAINT_URL,
     external: true,
   },
 };
 
 export const footerQuickLinks: NavItem[] = [
-  { label: { en: 'Verify', so: 'Xaqiiji' }, href: '/public/verify' },
-  { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: PORTAL_URL, external: true },
-  { label: { en: 'Register', so: 'Diiwaangelin' }, href: '/professionals/register' },
+  { label: { en: 'Verify', so: 'Xaqiiji' }, href: VERIFY_URL, external: true },
+  { label: { en: 'File a Complaint', so: 'Gudbi Cabasho' }, href: COMPLAINT_URL, external: true },
+  { label: { en: 'Register', so: 'Diiwaangelin' }, href: REGISTER_URL, external: true },
   { label: { en: 'NHPC Act Lr.31', so: 'Sharciga Lr.31' }, href: '/about/act' },
   { label: { en: 'Resources', so: 'Kheyraadka' }, href: '/resources' },
   { label: { en: 'Contact', so: 'Xiriir' }, href: '/contact' },
